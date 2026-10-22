@@ -47,7 +47,8 @@ TEAM 418 이 Claude 와 함께 이 프로젝트를 만들어 온 과정이에요
 - 소개 사이트 https://team418.netlify.app (+ [build.html](https://team418.netlify.app/build.html) 설계도)
   - 15초 소개 영상 (코드로 만든 영상, 0원) → 원본 [tools/intro-video](../tools/intro-video)
   - 첫 화면 등장인물 4명: 신뢰 게이지에 따라 표정이 바뀜
-  - **미연시 맛보기**: 루트 2개 × 6장면, 인물별 호감도, 플래그 분기, **엔딩 15종 + 도감** → [vn-design.md](vn-design.md)
+  - **미연시 맛보기**: 루트 2개 × 3장면, 인물별 호감도, 분기 1개씩, 엔딩 3개씩(총 6) + 도감 → [vn-design.md](vn-design.md)
+    - 처음엔 6장면 · 엔딩 15종으로 만들었다가 "맛보기치고 많다"는 의견으로 줄였어요. 15종 설계는 실제 게임 확장안으로 보관.
   - 인물 설정 6명 카드
 - 에셋: 캐릭터 표정 5종 · 동작 3종, 배경 5종 → [assets/README.md](../assets/README.md), 만드는 법 [asset-pipeline.md](asset-pipeline.md)
 - GitHub 비공개 저장소 (지금 여기), API 키 보호 설정

@@ -32,7 +32,7 @@ team418-hackathon/
 └─ docs/
    ├─ history.md            ← 프로젝트 흐름 · 결정 기록 · 남은 일  ⭐ 처음 오면 여기부터
    ├─ conversation-notes.md ← Claude 와 나눈 대화 정리 (시간 순)
-   ├─ vn-design.md          ← 미연시 설계: 인물 6명 · 장면표 · 엔딩 15종 조건
+   ├─ vn-design.md          ← 미연시 설계: 맛보기(엔딩 6) + 실제 게임 확장안(엔딩 15)
    ├─ ai-tools.md           ← NPC AI(JSON) · 그림 AI 비교 · 크레딧 · 주의점
    ├─ prompts.md            ← Higgsfield · 나노바나나 프롬프트 전체
    ├─ asset-pipeline.md     ← 에셋 만드는 순서 · 배경 지우기 · 영상 · 배포

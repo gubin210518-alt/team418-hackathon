@@ -678,9 +678,9 @@ table.cmp td{width:42%}
 
   <section class="blk band" id="vn">
     <div class="wrap">
-      <span class="tag">미연시 맛보기 · 루트 2개 · 엔딩 15종</span>
+      <span class="tag">미연시 맛보기 · 루트 2개 · 1~2분</span>
       <h2>오늘 하루, 누구로 살아 볼래?</h2>
-      <p class="lede">루트를 고르고 NPC와 대화해 보세요. <b>인물마다 호감도가 따로 쌓이고</b>, 앞에서 고른 선택이 뒤 장면을 바꿔요. 15개 엔딩을 모두 모아 보세요. 실제 게임에서는 AI가 NPC를 연기하고, 직접 입력한 말까지 판단해요.</p>
+      <p class="lede">루트를 고르고 NPC와 대화해 보세요. <b>인물마다 호감도가 따로 쌓이고</b>, 앞에서 고른 선택이 뒤 장면을 바꿔요. 루트마다 엔딩이 3개(좋음 · 보통 · 나쁨) 있어요. 실제 게임에서는 AI가 NPC를 연기하고, 직접 입력한 말까지 판단해요.</p>
       <div class="vx" id="vx">
         <canvas class="vx-conf" id="vxConf" aria-hidden="true"></canvas>
         <div class="vx-title" id="vxTitle">
@@ -689,9 +689,9 @@ table.cmp td{width:42%}
             <img src="img/c/ssam-neutral.webp" alt=""><img src="img/c/minjun-neutral.webp" alt=""><img src="img/c/parent-neutral.webp" alt=""><img src="img/c/friend-neutral.webp" alt="">
           </div>
           <div class="vx-routes">
-            <button class="vx-route s" type="button" data-route="s"><b>쌤 루트</b><span>나는 박 쌤. 민원 전화, 교감 메신저, 쉬는 시간 질문</span></button>
-            <button class="vx-route g" type="button" data-route="g"><b>고딩 루트</b><span>나는 민준. 기준표, 단톡방, 통화 중인 쌤, 엄마</span></button>
-            <button class="vx-route book" type="button" id="vxBookBtn"><b>엔딩 도감</b><span id="vxBookCnt">0 / 15</span></button>
+            <button class="vx-route s" type="button" data-route="s"><b>쌤 루트</b><span>나는 박 쌤. 민원 전화, 쉬는 시간 질문, 방과 후</span></button>
+            <button class="vx-route g" type="button" data-route="g"><b>고딩 루트</b><span>나는 민준. 기준표, 통화 중인 쌤, 밤 10시 메시지</span></button>
+            <button class="vx-route book" type="button" id="vxBookBtn"><b>엔딩 도감</b><span id="vxBookCnt">0 / 6</span></button>
           </div>
         </div>
         <div class="vx-stage" id="vxStage" hidden>
@@ -727,7 +727,7 @@ table.cmp td{width:42%}
     <div class="wrap">
       <span class="tag">인물 설정 · 6명</span>
       <h2>오늘 하루에 등장하는 사람들</h2>
-      <p class="lede">모두 나쁜 사람은 없어요. <b>각자 사정이 있을 뿐</b>이에요. 숨은 사정은 엔딩의 "서로 몰랐던 일"에서 드러나요. 그림을 누르면 표정이 바뀌어요.</p>
+      <p class="lede">모두 나쁜 사람은 없어요. <b>각자 사정이 있을 뿐</b>이에요. 숨은 사정은 엔딩의 "서로 몰랐던 일"에서 드러나요. 맛보기에는 그림 있는 4명이 나오고, 교감 선생님과 단톡방은 실제 게임에서 나와요. 그림을 누르면 표정이 바뀌어요.</p>
       <div class="ppl" id="ppl"></div>
     </div>
   </section>
@@ -938,7 +938,7 @@ table.cmp td{width:42%}
         <div class="zone mid"><div class="zbar"><i></i><i></i><i></i><i></i><i></i></div><b>5~9칸 · 주황</b><span>난이도 보통</span><em>엔딩: 아직은 평행선</em></div>
         <div class="zone high"><div class="zbar"><i></i><i></i><i></i><i></i><i></i></div><b>10~15칸 · 초록</b><span>난이도 쉬움 · NPC가 먼저 사정을 말해 준다</span><em>엔딩: 역지사지 성공</em></div>
       </div>
-      <p class="small">맨 위 게이지, 미연시 맛보기, 미니게임이 모두 같은 게이지를 써요. 미연시에서는 여기에 더해 <b>인물마다 호감도가 따로</b> 쌓이고, 엔딩은 루트마다 7개 + 숨겨진 엔딩 1개, 모두 15종이에요.</p>
+      <p class="small">맨 위 게이지, 미연시 맛보기, 미니게임이 모두 같은 게이지를 써요. 미연시에서는 여기에 더해 <b>인물마다 호감도가 따로</b> 쌓여요. 맛보기는 루트마다 엔딩 3개, 실제 게임은 인물별 엔딩까지 늘릴 계획이에요.</p>
     </div>
   </section>
 
@@ -1437,7 +1437,7 @@ for(var i=0;i<15;i++){var r=document.createElementNS(ns,'rect');r.setAttribute('
 r.setAttribute('fill',i<5?'#ef5b4c':i<10?'#f4a43a':'#5fd68a');r.setAttribute('opacity',i<9?1:.25);g.appendChild(r);}})();
 </script>
 <script>
-/* ===== 미연시 v2 : 인물별 호감도 · 플래그 분기 · 엔딩 15종 ===== */
+/* ===== 미연시 v2 : 인물별 호감도 · 플래그 분기 · 맛보기 엔딩 6종 ===== */
 (function(){
   function $(i){return document.getElementById(i);}
   var reduce=window.matchMedia&&matchMedia('(prefers-reduced-motion: reduce)').matches;
@@ -1473,115 +1473,63 @@ r.setAttribute('fill',i<5?'#ef5b4c':i<10?'#f4a43a':'#5fd68a');r.setAttribute('op
 
   /* ---------- 대본 ---------- */
   var ROUTES={
-    s:{name:'쌤 루트',me:'박 쌤',color:'#f4c64e',cast:['parent','minjun','friend'],
-      top:['민준이는 학원 때문에 밤 10시까지 게시판을 볼 틈이 없었다.','어머니는 퇴근이 늦어 학교 소식을 아이 말로만 듣는다.','반장은 단톡 불평을 혼자 떠안고 있었다.'],
+    s:{name:'쌤 루트',me:'박 쌤',color:'#f4c64e',cast:['parent','minjun'],
+      top:['민준이는 학원 때문에 밤 10시까지 게시판을 볼 틈이 없었다.','어머니는 퇴근이 늦어 학교 소식을 아이 말로만 듣는다.','쌤이 "바빠"라고 하면 학생은 "오지 마"로 듣기 쉽다.'],
       scenes:[
       {when:'08:20',where:'교무실 · 출근하자마자 전화',bg:'office-am',npc:'parent',pose:'call',
        line:'선생님, 저희 민준이가 수행평가 기준을 몰랐다고 하던데요. 공지가 제대로 된 건가요?',
        ch:[{t:'공지는 다 했습니다. 아이가 확인을 안 한 거죠.',d:{parent:-2},why:'사실이어도 탓하는 말로 들렸어요. 어머니는 더 서운해졌어요.'},
-           {t:'걱정되셨겠어요. 기준표를 문자로 다시 보내 드리고, 민준이와도 이야기해 볼게요.',d:{parent:2},set:'resend',why:'걱정을 먼저 받아 주고, 할 일을 약속했어요.'},
+           {t:'걱정되셨겠어요. 기준표를 문자로 다시 보내 드리고, 민준이와도 이야기해 볼게요.',d:{parent:2},why:'걱정을 먼저 받아 주고, 할 일을 약속했어요.'},
            {t:'지금 수업 들어가야 해서요. 나중에 다시 전화 주세요.',d:{parent:-1},why:'바쁜 건 맞지만, 언제 다시 이야기할지 정하지 않았어요.'}]},
-      {when:'09:40',where:'교무실 · 메신저',bg:'office-am',npc:'vp',
-       msgs:[['교감 선생님','박 선생님, 10시까지 학교폭력 예방교육 결재 올려 주세요.'],['교감 선생님','아까 학부모 민원 전화 건도 간단히 보고 부탁해요.']],
-       line:'(쉬는 시간까지 20분. 할 일이 쌓여 있다.)',
-       ch:[{t:'결재부터 빨리 끝내고, 쉬는 시간은 비워 두자.',d:{},set:'freebreak',why:'쉬는 시간에 찾아올 학생을 위해 시간을 남겼어요.'},
-           {t:'민원을 보고하면서 "공지를 단톡에도 올리자"고 제안하자.',d:{},set:'improve',why:'같은 오해가 반복되지 않게 방법을 바꾸려 했어요.'},
-           {t:'일단 수업 준비부터… 나머지는 이따 하자.',d:{},set:'rush',why:'급한 일이 뒤로 밀렸어요. 쉬는 시간이 바빠질 거예요.'}]},
       {when:'10:50',where:'교무실 앞 복도 · 쉬는 시간',bg:'hall',npc:'minjun',pose:'call',
-       line:function(F){return F.rush?'쌤, 질문 하나만… 아, 결재 쓰고 계시네요. 많이 바쁘세요?':'쌤, 질문 하나만 해도 돼요? …바쁘세요?';},
-       ch:[{t:'지금 괜찮아. 뭐가 궁금해?',d:{minjun:3},need:'freebreak',why:'비워 둔 쉬는 시간 덕분에 바로 들어 줄 수 있었어요.'},
-           {t:'결재 하나만 끝내고 3분 뒤에 볼게. 여기 잠깐 앉아 있을래?',d:{minjun:2},set:'promise',why:'바쁜 사정을 말하고 시간을 약속했어요.'},
+       line:'쌤, 질문 하나만 해도 돼요? …바쁘세요?',
+       ch:[{t:'결재 하나만 끝내고 3분 뒤에 볼게. 여기 잠깐 앉아 있을래?',d:{minjun:2},set:'promise',why:'바쁜 사정을 말하고 시간을 약속했어요. 이 선택은 뒤 장면을 바꿔요.'},
            {t:'지금은 좀 바빠. 다음에 와.',d:{minjun:-1},why:'"다음"이 언제인지 몰라서 민준이는 다시 안 올지도 몰라요.'},
            {t:'그런 건 교과서에 다 나와 있잖아.',d:{minjun:-2},why:'질문하러 오기까지 용기가 필요했을 거예요.'}]},
-      {when:'12:50',where:'복도 · 점심시간',bg:'hall',npc:'friend',pose:'talk',
-       line:function(F){return F.improve?'쌤! 교감 쌤한테 들었는데, 공지를 단톡에도 올리신다면서요? 제가 바로 올려도 돼요?':'쌤! 반장 서연인데요, 애들이 게시판을 잘 안 봐요. 기준표를 반 단톡에도 올려도 돼요?';},
-       ch:[{t:'좋은 생각이다. 같이 올리자. 알려 줘서 고마워.',d:{friend:2},set:'groupchat',why:'학생들이 실제로 보는 곳을 알려 준 반장을 믿어 줬어요.'},
-           {t:'게시판에 다 있어. 보는 습관을 들여야지.',d:{friend:-1},why:'맞는 말이지만, 학생들이 어디를 보는지는 듣지 않았어요.'},
-           {t:'그건 네가 알아서 해.',d:{friend:-1},why:'서연이는 허락인지 아닌지 헷갈렸어요.'}]},
       {when:'16:30',where:'교실 · 방과 후',bg:'class-pm',npc:'minjun',pose:'thanks',
-       line:function(F){return (F.promise||F.freebreak)?'쌤, 아까 질문 받아 주셔서 감사해요. 이제 기준표 이해했어요.':'쌤… 아까 못 물어본 거, 그냥 혼자 해 볼게요.';},
+       line:function(F){return F.promise?'쌤, 아까 3분 진짜 지켜 주셔서 감사해요. 이제 기준표 이해했어요.':'쌤… 아까 못 물어본 거, 그냥 혼자 해 볼게요.';},
        ch:[{t:'오늘 전화가 많아서 정신없었어. 그래도 와 줘서 고마워.',d:{minjun:2},why:'쌤의 하루를 솔직하게 말해서 서로 조금 더 알게 됐어요.'},
            {t:'선생님은 원래 바빠.',d:{minjun:0},why:'틀린 말은 아니지만 대화가 거기서 끝났어요.'},
-           {t:'(고개만 끄덕인다)',d:{minjun:-1},why:'민준이는 쌤이 화난 줄 알았어요.'}]},
-      {when:'17:20',where:'교무실 · 퇴근 전 전화',bg:'office-pm',npc:'parent',pose:'thanks',
-       line:function(F){return (F.resend&&F.groupchat)?'선생님, 보내 주신 기준표 잘 받았어요. 민준이도 단톡에서 봤대요. 아침엔 제가 좀 예민했죠.':F.resend?'선생님, 문자 잘 받았어요. 그런데 다른 아이들도 잘 모르는 것 같던데요?':'선생님, 아침에 말씀드린 건 어떻게 됐나요? 아직 아무 연락이 없어서요.';},
-       ch:[{t:'알려 주셔서 오히려 감사해요. 덕분에 공지 방법을 바꿔 볼 수 있었어요.',d:{parent:2},why:'민원을 "도움"으로 받아들였어요. 어머니도 마음이 풀렸어요.'},
-           {t:'공지는 원래 학생이 챙겨야 하는 거라서요.',d:{parent:-2},why:'하루를 마무리하는 말이 다시 아침으로 돌아갔어요.'},
-           {t:'오늘 정신이 없어서… 내일 다시 연락드릴게요.',d:{parent:0},why:'솔직했지만, 어머니는 하루 더 기다려야 해요.'}]}
+           {t:'(고개만 끄덕인다)',d:{minjun:-1},why:'민준이는 쌤이 화난 줄 알았어요.'}]}
       ],
       endings:[
-        {id:'s-true',g:'TRUE',t:'모두의 하루를 헤아린 쌤',ok:function(S){return S.v.parent>=3&&S.v.minjun>=3&&S.v.friend>=2;},art:['parent-happy','minjun-happy','friend-happy'],bg:'class-pm',
-         p:'어머니, 민준이, 서연이 모두 오늘 쌤의 하루를 조금 알게 됐어요. 바쁜 하루였지만 아무도 서운하지 않았어요.'},
-        {id:'s-parent',g:'GOOD',t:'든든한 한 팀',ok:function(S){return S.v.parent>=3;},art:['parent-happy'],bg:'office-pm',
-         p:'아침의 민원 전화가 저녁엔 "같이 챙겨요"로 바뀌었어요. 어머니는 이제 쌤 편이에요.'},
-        {id:'s-minjun',g:'GOOD',t:'질문 노트 한 권',ok:function(S){return S.v.minjun>=4;},art:['minjun-happy'],bg:'class-pm',
-         p:'민준이는 내일도 질문하러 올 거예요. 쉬는 시간 3분이 아이의 용기를 지켰어요.'},
-        {id:'s-friend',g:'GOOD',t:'반장의 단톡 공지',ok:function(S){return S.v.friend>=2&&S.F.groupchat;},art:['friend-happy'],bg:'hall',
-         p:'서연이가 올린 기준표 사진 한 장에 단톡방이 조용해졌어요. 공지는 학생이 보는 곳에 있어야 해요.'},
-        {id:'s-burn',g:'BAD',t:'번아웃 직전',ok:function(S){return S.F.rush&&S.total<=0;},art:['ssam-sad'],bg:'office-pm',
-         p:'급한 일을 미루다 하루 종일 쫓겼어요. 쌤도 사람이에요. 바쁠수록 "언제"를 약속해야 해요.'},
+        {id:'s-good',g:'GOOD',t:'모두의 하루를 헤아린 쌤',ok:function(S){return S.total>=4;},art:['parent-happy','minjun-happy'],bg:'class-pm',
+         p:'어머니도 민준이도 오늘 쌤의 하루를 조금 알게 됐어요. 바쁜 하루였지만 아무도 서운하지 않았어요.'},
         {id:'s-normal',g:'NORMAL',t:'아직은 평행선',ok:function(S){return S.total>=1;},art:['parent-neutral','minjun-neutral'],bg:'office-pm',
          p:'큰 다툼은 없었지만, 서로의 사정을 알기엔 하루가 너무 짧았어요.'},
         {id:'s-bad',g:'BAD',t:'오해가 쌓인 하루',ok:function(){return true;},art:['parent-upset','minjun-sad'],bg:'office-pm',
          p:'모두가 "쌤은 우리 말을 안 듣는다"고 생각하게 됐어요. 쌤도 억울했지만, 그 말을 하지 못했어요.'}
       ]},
-    g:{name:'고딩 루트',me:'민준',color:'#5fc8f0',cast:['friend','ssam','parent'],
-      top:['쌤은 점심시간에도 학부모 전화를 받고 있었다.','공지를 올린 곳(게시판)과 학생이 보는 곳(단톡)이 달랐다.','엄마의 전화는 화가 아니라 걱정이었다.'],
+    g:{name:'고딩 루트',me:'민준',color:'#5fc8f0',cast:['friend','ssam'],
+      top:['쌤은 점심시간에도 학부모 전화를 받고 있었다.','공지를 올린 곳(게시판)과 학생이 보는 곳(단톡)이 달랐다.','밤 10시에도 과제하는 학생을 쌤도 걱정하고 있었다.'],
       scenes:[
       {when:'08:30',where:'교무실 앞 복도 · 등교',bg:'hall',npc:'friend',pose:'call',
        line:'민준아, 수행평가 기준표 봤어? 나도 못 찾겠어. 마감 내일이잖아.',
-       ch:[{t:'몰라. 쌤이 안 올린 거 아냐?',d:{friend:-1},set:'blame',why:'확인하기 전에 남 탓부터 했어요.'},
-           {t:'점심에 같이 쌤한테 물어보러 가자.',d:{friend:2},set:'together',why:'혼자 끙끙대지 않고 같이 해결하자고 했어요.'},
-           {t:'게시판 다시 찾아보자. 찾으면 사진 찍어 올게.',d:{friend:1},set:'board',why:'직접 확인해 보기로 했어요.'}]},
-      {when:'12:10',where:'2-7 단톡방',bg:'hall',npc:'group',
-       msgs:[['2-7 단톡방','ㅋㅋ 수행 기준 어디 있음?'],['2-7 단톡방','쌤이 공지 안 한 듯'],['2-7 단톡방','아 진짜 짜증나네']],
-       line:'(단톡방 알림이 계속 울린다.)',
-       ch:[{t:'ㄹㅇ 쌤이 너무했다',d:{ssam:-1},set:'gossip',why:'분위기에 휩쓸렸어요. 이 말은 나중에 쌤 귀에도 들어가요.'},
-           {t:'게시판에 있대. 사진 올림!',d:{friend:1},set:'helped',why:'불평 대신 정보를 나눴어요. 단톡방이 조용해졌어요.'},
-           {t:'(읽고 그냥 넘긴다)',d:{},why:'아무 일도 일어나지 않았어요. 불평은 계속 쌓여요.'}]},
+       ch:[{t:'몰라. 쌤이 안 올린 거 아냐?',d:{friend:-1},why:'확인하기 전에 남 탓부터 했어요.'},
+           {t:'점심에 같이 쌤한테 물어보러 가자.',d:{friend:2},set:'together',why:'같이 해결하자고 했어요. 이 선택은 뒤 장면을 바꿔요.'},
+           {t:'게시판 다시 찾아보자.',d:{friend:1},why:'직접 확인해 보기로 했어요.'}]},
       {when:'13:10',where:'교무실 앞 · 점심시간',bg:'hall',npc:'ssam',pose:'call',
        line:function(F){return F.together?'(서연이와 같이 왔다. 박 쌤은 통화 중이다.) …네, 어머님. 그 부분은 제가 다시 확인해 보겠습니다.':'(통화 중) …네, 어머님. 네, 그 부분은 제가 다시 확인해 보겠습니다.';},
        ch:[{t:'쌤! 쌤! 이거 지금 꼭 물어봐야 돼요!',d:{ssam:-2},why:'통화 중인 쌤은 두 사람을 동시에 상대해야 했어요.'},
-           {t:'(통화가 끝날 때까지 기다렸다가) 바쁘신데 질문 하나 해도 될까요?',d:{ssam:2},set:'waited',why:'상황을 보고 타이밍을 맞췄어요.'},
+           {t:'(통화가 끝날 때까지 기다렸다가) 바쁘신데 질문 하나 해도 될까요?',d:{ssam:2},why:'상황을 보고 타이밍을 맞췄어요.'},
            {t:'(그냥 교실로 돌아간다)',d:{ssam:-1},why:'쌤은 질문하러 온 걸 몰라요. 궁금한 건 그대로 남았어요.'}]},
-      {when:'16:20',where:'교무실 · 방과 후',bg:'office-pm',npc:'ssam',pose:'talk',
-       line:function(F){return F.gossip?'기준표는 지난주에 게시판에 올렸어. …단톡에서 쌤 얘기 나온 것도 들었고.':'수행평가 기준표는 지난주에 학급 게시판에 올렸는데, 못 봤어?';},
-       ch:[{t:'죄송해요. 단톡에서 저도 같이 말했어요.',d:{ssam:3},need:'gossip',why:'먼저 사과하기는 쉽지 않아요. 쌤은 오히려 마음이 놓였어요.'},
-           {t:'어디 올라온 줄 몰랐어요. 다음엔 단톡에도 올려 주시면 좋겠어요.',d:{ssam:2},why:'몰랐던 이유와 바라는 점을 같이 말했어요.'},
-           {t:'아 몰라요, 안 봤어요.',d:{ssam:-2},why:'쌤은 공지를 무시당했다고 느꼈어요.'},
-           {t:'봤는데 이 부분이 이해가 안 돼서요.',d:{ssam:1},why:'무엇을 모르는지 콕 집어서 물었어요.'}]},
-      {when:'19:30',where:'집 · 저녁',bg:'night',npc:'parent',pose:'talk',
-       line:'민준아, 엄마가 아침에 담임 선생님께 전화했어. 기준표 몰랐다며? 왜 엄마한테 말 안 했어?',
-       ch:[{t:'왜 쌤한테 전화해! 창피하게!',d:{parent:-2},why:'엄마는 걱정해서 한 일이었어요. 둘 다 속상해졌어요.'},
-           {t:'걱정했구나. 오늘 쌤이랑 직접 얘기해서 이제 알아.',d:{parent:2,ssam:1},why:'엄마의 걱정을 받아 주고, 해결한 걸 알려 드렸어요.'},
-           {t:'몰라, 피곤해.',d:{parent:-1},why:'진짜 피곤했지만, 엄마는 더 걱정하게 됐어요.'}]},
       {when:'22:00',where:'내 방 · 학원 끝나고',bg:'night',npc:'ssam',
        msgs:[['박 쌤','늦게까지 과제하느라 고생했다. 내일 모르는 거 있으면 아침에 와.']],
        line:'(학원에서 돌아오자 쌤에게 메시지가 와 있다.)',
-       ch:[{t:'감사합니다! 내일 아침에 갈게요.',d:{ssam:2},set:'morning',why:'짧아도 고맙다는 말이 전해졌어요.'},
+       ch:[{t:'감사합니다! 내일 아침에 갈게요.',d:{ssam:2},why:'짧아도 고맙다는 말이 전해졌어요.'},
            {t:'(읽고 답장하지 않는다)',d:{ssam:-1},why:'쌤은 메시지가 잘 갔는지 계속 신경 쓰였어요.'},
-           {t:'쌤도 오늘 전화 많이 받으셨죠? 고생하셨어요.',d:{ssam:3},set:'morning',why:'쌤의 하루를 떠올려 준 한마디였어요.'}]}
+           {t:'쌤도 오늘 전화 많이 받으셨죠? 고생하셨어요.',d:{ssam:3},why:'쌤의 하루를 떠올려 준 한마디였어요.'}]}
       ],
       endings:[
-        {id:'g-true',g:'TRUE',t:'쌤의 하루를 본 학생',ok:function(S){return S.v.ssam>=4&&S.v.friend>=2&&S.v.parent>=2;},art:['ssam-happy','friend-happy','parent-happy'],bg:'class-pm',
-         p:'쌤이 왜 바빴는지, 엄마가 왜 전화했는지, 친구가 왜 불안했는지 오늘 다 알게 됐어요.'},
-        {id:'g-ssam',g:'GOOD',t:'아침 8시의 약속',ok:function(S){return S.v.ssam>=4;},art:['ssam-happy'],bg:'office-am',
-         p:'내일 아침, 교무실 문을 두드리는 게 더 이상 무섭지 않아요.'},
-        {id:'g-friend',g:'GOOD',t:'같이 묻는 친구',ok:function(S){return S.v.friend>=3;},art:['friend-happy','minjun-happy'],bg:'hall',
-         p:'혼자였으면 못 물어봤을 거예요. 서연이와 같이라서 용기가 났어요.'},
-        {id:'g-parent',g:'GOOD',t:'식탁 위의 대화',ok:function(S){return S.v.parent>=2;},art:['parent-happy'],bg:'night',
-         p:'엄마에게 오늘 있었던 일을 처음으로 길게 이야기했어요.'},
-        {id:'g-storm',g:'BAD',t:'단톡 폭풍',ok:function(S){return S.F.gossip&&S.v.ssam<=0;},art:['ssam-upset','friend-sad'],bg:'night',
-         p:'단톡에서 한 말은 생각보다 멀리 퍼져요. 쌤은 그날 밤 메시지를 몇 번이나 썼다 지웠어요.'},
+        {id:'g-good',g:'GOOD',t:'쌤의 하루를 본 학생',ok:function(S){return S.total>=4;},art:['ssam-happy','friend-happy'],bg:'class-pm',
+         p:'쌤이 왜 바빴는지, 친구가 왜 불안했는지 오늘 알게 됐어요. 내일 아침 교무실 문을 두드리는 게 무섭지 않아요.'},
         {id:'g-normal',g:'NORMAL',t:'아직은 평행선',ok:function(S){return S.total>=1;},art:['ssam-neutral','friend-neutral'],bg:'office-pm',
          p:'기준표는 찾았지만, 쌤이 어떤 하루를 보냈는지는 아직 몰라요.'},
-        {id:'g-bad',g:'BAD',t:'오해가 쌓인 하루',ok:function(){return true;},art:['ssam-upset','parent-sad'],bg:'night',
-         p:'"쌤은 공지도 안 하고, 엄마는 간섭만 한다." 오늘 밤 민준이는 그렇게 생각하며 잠들었어요.'}
+        {id:'g-bad',g:'BAD',t:'오해가 쌓인 하루',ok:function(){return true;},art:['ssam-upset','friend-sad'],bg:'night',
+         p:'"쌤은 공지도 안 하고 우리 말도 안 들어." 오늘 밤 민준이는 그렇게 생각하며 잠들었어요.'}
       ]}
   };
-  var SECRET={id:'secret',g:'SECRET',t:'말 한마디의 힘',art:['ssam-happy','minjun-happy','parent-happy','friend-happy'],bg:'class-pm',
-    p:'정해진 선택지가 아니라 내 말로 마음을 전했어요. 실제 게임에서는 AI가 이런 말을 알아듣고 NPC가 반응해요.'};
-  var ALL=[].concat(ROUTES.s.endings,ROUTES.g.endings,[SECRET]);
+  var ALL=[].concat(ROUTES.s.endings,ROUTES.g.endings);
   var GC={TRUE:'#ffd76a',GOOD:'#5fd68a',NORMAL:'#f4a43a',BAD:'#ef5b4c',SECRET:'#c792ea'};
   var POS=['감사','고마','미안','죄송','이해','괜찮','같이','도와','기다','고생','걱정','덕분','언제','시간 되','부탁','힘드','수고'];
   var NEG=['몰라','싫','귀찮','나중','짜증','왜요','알아서','됐어','그만','시끄'];
@@ -1590,7 +1538,7 @@ r.setAttribute('fill',i<5?'#ef5b4c':i<10?'#f4a43a':'#5fd68a');r.setAttribute('op
   var KEY='team418-endings';
   function got(){try{return JSON.parse(localStorage.getItem(KEY)||'[]');}catch(e){return [];}}
   function save(id){try{var a=got();if(a.indexOf(id)<0){a.push(id);localStorage.setItem(KEY,JSON.stringify(a));}}catch(e){}}
-  var mem=[];function have(){var a=got();mem.forEach(function(x){if(a.indexOf(x)<0)a.push(x);});return a;}
+  var mem=[];function have(){var a=got();mem.forEach(function(x){if(a.indexOf(x)<0)a.push(x);});return a.filter(function(x){return ALL.some(function(E){return E.id===x;});});}
   function cnt(){$('vxBookCnt').textContent=have().length+' / '+ALL.length;}
 
   /* ---------- 상태 ---------- */
@@ -1697,16 +1645,15 @@ r.setAttribute('fill',i<5?'#ef5b4c':i<10?'#f4a43a':'#5fd68a');r.setAttribute('op
   /* ---------- 엔딩 ---------- */
   function ending(){
     var R=ROUTES[S.r],E=null;
-    if(S.free>=2&&S.total>=6)E=SECRET;
-    else for(var i=0;i<R.endings.length;i++){if(R.endings[i].ok(S)){E=R.endings[i];break;}}
+    for(var i=0;i<R.endings.length;i++){if(R.endings[i].ok(S)){E=R.endings[i];break;}}
     save(E.id);mem.push(E.id);cnt();
     var best=S.log.slice().sort(function(a,b){return b.d-a.d;})[0],worst=S.log.slice().sort(function(a,b){return a.d-b.d;})[0];
     var other=S.r==='s'?'g':'s',gc=GC[E.g],bad=E.g==='BAD';
     var stat=R.cast.map(function(n){var v=S.v[n];return '<span class="vx-m" style="--c:'+NPC[n].c+'"><img src="img/c/'+NPC[n].img+'-'+(v>=2?'happy':v>=0?'neutral':v>=-1?'sad':'upset')+'.webp" alt="">'+NPC[n].n+'<b style="color:'+(v>0?'var(--high)':v<0?'var(--low)':'var(--dust)')+'">♥ '+(v>0?'+':'')+v+'</b></span>';}).join('');
-    var tops=R.cast.map(function(n){return NPC[n].secret;});
+    var tops=R.top;
     endEl.className='vx-end'+(bad?' bad':'');
     endEl.innerHTML='<div class="vx-end-art" style="--bg:url(img/bg/'+E.bg+'.webp)">'+E.art.map(function(a){return '<img src="img/c/'+a+'.webp" alt="">';}).join('')+'</div>'+
-      '<div class="vx-end-body" style="--gc:'+gc+'"><span class="vx-grade">'+E.g+' END · '+(E===SECRET?'숨겨진 엔딩':R.name)+'</span><h3>'+esc(E.t)+'</h3><p>'+esc(E.p)+'</p>'+
+      '<div class="vx-end-body" style="--gc:'+gc+'"><span class="vx-grade">'+E.g+' END · '+R.name+'</span><h3>'+esc(E.t)+'</h3><p>'+esc(E.p)+'</p>'+
       '<div class="vx-stat">'+stat+'</div>'+
       '<div class="vx-hl">'+(best&&best.d>0?'<div><b>가장 마음을 움직인 한마디</b><br>"'+esc(best.t)+'"</div>':'')+(worst&&worst.d<0?'<div><b>가장 아팠던 한마디</b><br>"'+esc(worst.t)+'"</div>':'')+(!(best&&best.d>0)&&!(worst&&worst.d<0)?'<div><b>오늘의 한마디</b><br>큰 파도 없이 지나간 하루였어요.</div>':'')+'</div>'+
       '<b>서로 몰랐던 일 TOP 3</b><ol>'+tops.map(function(t){return '<li>'+esc(t)+'</li>';}).join('')+'</ol>'+
@@ -1719,8 +1666,8 @@ r.setAttribute('fill',i<5?'#ef5b4c':i<10?'#f4a43a':'#5fd68a');r.setAttribute('op
   }
   function openBook(){
     var a=have(),h='<header><b>엔딩 도감</b><span class="small">'+a.length+' / '+ALL.length+' 모음 · 이 브라우저에만 저장돼요</span><button class="btn ghost" type="button" id="vxBookBack">처음으로</button></header><div class="vx-grid">';
-    ALL.forEach(function(E){var on=a.indexOf(E.id)>=0,rn=E===SECRET?'숨겨진 엔딩':(E.id[0]==='s'?'쌤 루트':'고딩 루트');
-      h+='<div class="vx-e'+(on?'':' lock')+'" style="--gc:'+GC[E.g]+'"><i>'+(on||E.g!=='SECRET'?E.g:'???')+' END</i><b>'+(on?esc(E.t):'???')+'</b><span>'+rn+'</span></div>';});
+    ALL.forEach(function(E){var on=a.indexOf(E.id)>=0,rn=E.id[0]==='s'?'쌤 루트':'고딩 루트';
+      h+='<div class="vx-e'+(on?'':' lock')+'" style="--gc:'+GC[E.g]+'"><i>'+E.g+' END</i><b>'+(on?esc(E.t):'???')+'</b><span>'+rn+'</span></div>';});
     book.innerHTML=h+'</div>';show(book);$('vxBookBack').onclick=function(){show(title);};
   }
   /* 컨페티 · 비 */
@@ -1747,7 +1694,7 @@ r.setAttribute('fill',i<5?'#ef5b4c':i<10?'#f4a43a':'#5fd68a');r.setAttribute('op
 
   var ppl=$('ppl'),EXP=['neutral','happy','surprised','sad','upset'];
   ['ssam','minjun','parent','friend','vp','group'].forEach(function(k){var N=NPC[k],d=document.createElement('article');d.className='pp';d.style.setProperty('--c',N.c);
-    var art=N.msg?'<span class="msg">'+(k==='vp'?'✉':'단톡')+'</span><em>'+N.msg+'로만 등장</em>':'<img src="img/c/'+N.img+'-neutral.webp" alt="'+N.n+'" loading="lazy"><em>눌러서 표정 바꾸기</em>';
+    var art=N.msg?'<span class="msg">'+(k==='vp'?'✉':'단톡')+'</span><em>실제 게임에서 등장 · '+N.msg+'</em>':'<img src="img/c/'+N.img+'-neutral.webp" alt="'+N.n+'" loading="lazy"><em>눌러서 표정 바꾸기</em>';
     d.innerHTML='<div class="pp-art" style="--bg:url(img/bg/'+(N.bg||'office-am')+'.webp)">'+art+'</div><div class="pp-body"><h3>'+N.n+'<small>'+N.age+'</small></h3>'+
       '<dl><dt>성격</dt><dd>'+esc(N.who)+'</dd><dt>숨은 사정</dt><dd>'+esc(N.secret)+'</dd><dt class="like">좋아하는 말</dt><dd>'+esc(N.like)+'</dd><dt class="hate">싫어하는 말</dt><dd>'+esc(N.hate)+'</dd></dl></div>';
     if(!N.msg){var i=0,im=d.querySelector('img');d.querySelector('.pp-art').onclick=function(){i=(i+1)%EXP.length;im.src='img/c/'+N.img+'-'+EXP[i]+'.webp';};}
