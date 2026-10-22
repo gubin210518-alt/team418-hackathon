@@ -11,6 +11,8 @@
 
 - 소개 사이트: https://team418.netlify.app
 - 설계도(화면 · 대본 · 준비물): https://team418.netlify.app/build.html
+- **Notion 팀 게시판** (일정 · 담당 · 할 일 보드): https://app.notion.com/p/4010df95d346818b97a6df783552f1d1
+  - 문서 원본은 이 GitHub, Notion 은 할 일 보드 · 링크 모음만. **Notion 에도 API 키는 적지 않아요.**
 
 ---
 
