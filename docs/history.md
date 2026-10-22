@@ -36,7 +36,8 @@ TEAM 418 이 Claude 와 함께 이 프로젝트를 만들어 온 과정이에요
 
 - NPC 대사 · 점수: **LLM API 에게 JSON 으로만 답하게** 해요 → `{"say","trust","why"}`
   - "제타(zeta)" 같은 캐릭터 채팅 앱은 공식 API 를 찾지 못했고, 점수(JSON)를 못 받아서 쓰지 않아요.
-  - 어떤 회사 API 를 쓸지, 누구 계정으로 할지는 **아직 미정**이에요.
+  - **10/22 결정: OpenAI(ChatGPT) API** — 동아리(매니악코더) 이름으로 결제해 둔 계정. 해커톤용 키를 따로 만들고 사용 한도를 걸어요.
+  - Jev(TypeSafe AI)도 알아봤지만 NPC 대사를 못 만들고 한국어 · 가입 · 나이 제한이 불확실해서 쓰지 않아요.
 - 그림: Higgsfield(무료 크레딧 부족) → **Google Gemini 나노바나나**로 결정
   - 코드로 그린 SVG 캐릭터는 퀄리티가 부족해서 탈락했어요 (비교 페이지: [archive/svg-vs-higgsfield.html](archive/svg-vs-higgsfield.html))
   - 배경도 SVG 대신 나노바나나로 만들기로 했어요.
@@ -55,7 +56,8 @@ TEAM 418 이 Claude 와 함께 이 프로젝트를 만들어 온 과정이에요
 
 ## 5. 남은 일
 
-- [ ] AI API 고르기 (선생님과 상의) → `server/` 만들기 → 미연시에 연결
+- [x] AI API 고르기 → OpenAI (동아리 계정)
+- [ ] 동아리 계정 사용 확인 · 해커톤용 키 · 사용 한도 → `server/` 만들기 → 미연시에 연결
 - [ ] 결재요구서 · Notion 을 "하드웨어 없음"으로 고치기, 부품 주문 취소/변경 말씀드리기
 - [ ] 팀원 GitHub 초대 — 호진 `backchun0911` (연님이 직접 초대), 하선 아이디 필요
 - [x] 역할 나누기 (AI 1 서버 · AI 2 화면+총괄 · AI 3 대본·발표) → [roles/README.md](roles/README.md)
