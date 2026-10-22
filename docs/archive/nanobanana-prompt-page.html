@@ -1,0 +1,130 @@
+<title>나노바나나 프롬프트 모음</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Black+Han+Sans&family=IBM+Plex+Sans+KR:wght@400;500;700&family=JetBrains+Mono:wght@500;700&display=swap">
+<style>
+/* layout: 칠판 위의 제작 체크리스트 — 한 줄에 프롬프트 하나, 복사 버튼은 항상 같은 자리 */
+:root{
+  --board:#0f1d19; --board2:#152823; --line:#2a433b; --chalk:#eef3ea; --dust:#9fb3a9;
+  --ssam:#f4c64e; --goo:#5fc8f0; --high:#5fd68a; --warn:#f4a43a;
+  --f-disp:'Black Han Sans','IBM Plex Sans KR',sans-serif;
+  --f-body:'IBM Plex Sans KR',system-ui,sans-serif;
+  --f-mono:'JetBrains Mono',ui-monospace,monospace;
+  color-scheme:dark;
+}
+*{box-sizing:border-box}
+body{margin:0;background:var(--board);color:var(--chalk);font-family:var(--f-body);font-size:15px;line-height:1.65;word-break:keep-all;
+  background-image:linear-gradient(rgba(238,243,234,.035) 1px,transparent 1px),linear-gradient(90deg,rgba(238,243,234,.035) 1px,transparent 1px);background-size:32px 32px}
+.wrap{max-width:860px;margin:0 auto;padding-block:40px 72px;padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px));display:flex;flex-direction:column;gap:44px}
+h1,h2,h3{font-family:var(--f-disp);font-weight:400;margin:0;line-height:1.2;text-wrap:balance}
+h1{font-size:clamp(28px,5vw,42px)} h2{font-size:clamp(22px,3.4vw,28px)} h3{font-size:18px}
+p{margin:0;max-width:66ch}
+.tag{font-family:var(--f-mono);font-size:12px;letter-spacing:.08em;color:var(--dust);text-transform:uppercase}
+.dust{color:var(--dust)}
+header,section{display:flex;flex-direction:column;gap:14px}
+.steps{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:12px;margin:0;padding:0;list-style:none}
+.steps li{background:var(--board2);border:1px solid var(--line);border-radius:12px;padding:12px 14px;font-size:14px}
+.steps b{display:block;font-family:var(--f-mono);color:var(--ssam);font-size:12px;margin-bottom:2px}
+.note{border:1px solid var(--warn);border-radius:12px;padding:12px 14px;font-size:14px;background:rgba(244,164,58,.07)}
+.note b{color:var(--warn)}
+.item{background:var(--board2);border:1px solid var(--line);border-radius:14px;padding:14px;display:flex;flex-direction:column;gap:10px;min-width:0}
+.item .top{display:flex;align-items:flex-start;justify-content:space-between;gap:12px}
+.item .top>div{min-width:0}
+.item .nm{font-weight:700;font-size:16px}
+.item .use{font-size:13px;color:var(--dust)}
+.pill{display:inline-block;font-family:var(--f-mono);font-size:11px;padding:1px 8px;border-radius:999px;border:1px solid var(--line);color:var(--dust);margin-right:6px}
+.pill.must{border-color:var(--high);color:var(--high)}
+.pill.opt{border-color:var(--warn);color:var(--warn)}
+pre{margin:0;white-space:pre-wrap;word-break:break-word;font-family:var(--f-mono);font-size:12.5px;line-height:1.6;background:#0b1512;border:1px solid var(--line);border-radius:10px;padding:12px;color:#dfe9e2;user-select:all}
+button.copy{flex:none;font:inherit;font-size:13px;font-weight:700;color:var(--board);background:var(--chalk);border:0;border-radius:999px;padding:7px 16px;cursor:pointer}
+button.copy:focus-visible{outline:2px solid var(--goo);outline-offset:2px}
+button.copy[data-done="1"]{background:var(--high)}
+.list{display:flex;flex-direction:column;gap:12px}
+.cols{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:8px}
+.cols div{background:#0b1512;border:1px solid var(--line);border-radius:10px;padding:8px 10px;font-size:12.5px}
+.cols b{display:block;color:var(--ssam);font-size:12px}
+@media (max-width:700px){.steps{grid-template-columns:1fr}.cols{grid-template-columns:repeat(2,minmax(0,1fr))}}
+</style>
+
+<div class="wrap">
+  <header>
+    <span class="tag">TEAM 418 · 역지사지 시뮬레이터 · 에셋 제작</span>
+    <h1>나노바나나 프롬프트 모음</h1>
+    <p class="dust">표정은 이미 끝났어요. 이제 동작(포즈)과 배경만 만들면 돼요. 프롬프트마다 복사 버튼이 있어요. 한 번 생성하면 4명이 같이 나와서, 이미지 수를 아낄 수 있어요.</p>
+    <ol class="steps">
+      <li><b>1</b>Gemini에서 이미지 만들기를 열고 <code>reference_lineup.jpg</code>를 올려요 (캐릭터용). 배경용은 같은 그림을 "화풍 참고"로 올려요.</li>
+      <li><b>2</b>프롬프트를 복사해서 붙여 넣고 생성해요. 얼굴이나 옷이 바뀌면 같은 문장으로 다시 생성해요.</li>
+      <li><b>3</b>마음에 드는 그림을 <code>해커톤 캐릭터 사진</code> 폴더에 저장해요. 파일 이름에 번호(A, B, C…)를 붙여요. 그러면 제가 자르고 배경을 지워서 게임에 넣어요.</li>
+    </ol>
+    <p class="note"><b>알아 둘 것</b> 지금 받은 기쁜/슬픈 그림의 오른쪽 아래에 Gemini 반짝이 표시(✦)가 있어요. 구글이 무료 이미지에 붙이는 AI 생성 표시예요. 저는 이 표시를 지우지 않고, 캐릭터를 가슴~허리 높이까지만 잘라서 쓸게요. 그리고 발표 자료와 사이트에 "AI 생성 이미지(Google Gemini)"라고 적어 두기를 추천해요.</p>
+  </header>
+
+  <section>
+    <span class="tag">공통 문장 (캐릭터 동작용)</span>
+    <h2>캐릭터 동작 세트</h2>
+    <p class="dust">한 장에 4명이 각자 다른 동작을 해요. 칸을 지키게 해야 나중에 한 명씩 자르기 쉬워요.</p>
+    <div class="cols"><div><b>왼쪽 1칸</b>박 쌤</div><div><b>2칸</b>민준</div><div><b>3칸</b>학부모</div><div><b>오른쪽 4칸</b>서연</div></div>
+    <div class="list" id="poses"></div>
+  </section>
+
+  <section>
+    <span class="tag">표정 더 필요하면</span>
+    <h2>표정 추가 (선택)</h2>
+    <p class="dust">지금은 기본·웃음·속상이 있어요. 신뢰 게이지가 많이 떨어지는 장면에는 아래 두 개가 있으면 좋아요.</p>
+    <div class="list" id="faces"></div>
+  </section>
+
+  <section>
+    <span class="tag">배경은 이제 나노바나나로</span>
+    <h2>배경 세트</h2>
+    <p class="dust">사람이 없는 장면이에요. 캐릭터가 서는 화면 아래 가운데는 비워 달라고 적었어요. 같은 그림을 화풍 참고로만 올려요.</p>
+    <div class="list" id="bgs"></div>
+  </section>
+</div>
+
+<script>
+(function(){
+  var LOCK='Use the attached reference image as the character and style reference. Keep exactly the same art style (clean Korean webtoon, thin dark outlines, soft cel shading, flat pastel colors), the same four characters (same faces, hairstyles, outfits, props), the same plain green background, the same 16:9 image size and the same four columns from left to right: teacher with glasses, boy student, mother, girl student. Each character stays inside their own column at the same size so they can be cropped one by one. No text.';
+  var BG='Use the attached reference image only for art style (clean Korean webtoon background art, thin dark outlines, soft cel shading, flat pastel colors). Draw an empty background scene with no people, no text, no logos, 16:9. Keep the lower middle area uncluttered because characters will be placed there. Scene: ';
+
+  var POSES=[
+    {id:'A',nm:'동작 A · 전화와 질문',use:'쌤 루트 08:20 학부모 전화, 10:50 민준 질문 / 고딩 루트 13:10 통화 중인 박 쌤',must:1,
+     t:LOCK+' Change only the poses and actions, keep natural neutral expressions. From left to right: (1) the teacher holds a smartphone to his ear with one hand and the clipboard in the other, listening seriously and a little tired; (2) the boy raises one hand slightly to ask a question, hesitant, the other hand holds the notebook against his chest; (3) the mother holds a smartphone to her ear with one hand, her other hand on her chest, worried, speaking; (4) the girl touches her earphone with one hand and tilts her head, listening carefully.'},
+    {id:'B',nm:'동작 B · 진지한 대화',use:'고딩 루트 16:20 기준표 장면 / 쌤 루트 학부모 걱정 장면 / 친구 응원',must:1,
+     t:LOCK+' Change only the poses and actions, keep natural neutral expressions. From left to right: (1) the teacher points at the clipboard with one finger as if explaining a table to the viewer, kind but serious; (2) the boy holds the notebook out toward the viewer with both hands, nervous, eyebrows slightly raised; (3) the mother crosses her arms, worried and a little disappointed, chin slightly lowered; (4) the girl gives a thumbs-up with one hand, encouraging.'},
+    {id:'C',nm:'동작 C · 마무리와 감사',use:'쌤 루트 16:30 방과 후 / 고딩 루트 22:00 밤 메시지 / 엔딩',must:1,
+     t:LOCK+' Change only the poses and actions. From left to right: (1) the teacher looks down at a smartphone held in both hands, typing a message, with a soft tired smile; (2) the boy bows his head slightly with both hands in front of him, thankful, small smile; (3) the mother holds the smartphone down at her side, relieved, gentle smile, small nod; (4) the girl waves one hand cheerfully at the viewer, smiling.'}
+  ];
+  var FACES=[
+    {id:'D',nm:'표정 · 놀람 / 당황',use:'예상 못 한 말을 들었을 때',
+     t:LOCK+' Same standing poses and props as the reference image. Only change the facial expressions: all four are surprised and a little flustered, wide eyes, small open mouth, one small sweat drop each.'},
+    {id:'E',nm:'표정 · 서운함 / 화남',use:'신뢰 게이지가 낮은 구간(빨간 칸)',
+     t:LOCK+' Same standing poses and props as the reference image. Only change the facial expressions: all four are upset and annoyed, eyebrows lowered, lips pressed together, eyes looking slightly to the side, no tears.'}
+  ];
+  var BGS=[
+    {id:'1',nm:'교무실 · 오전',use:'쌤 루트 08:20 전화',must:1,t:BG+'a Korean high school teachers\' office in the morning, several desks with papers and monitors, a desk phone, bulletin board on the wall, soft morning light from a window.'},
+    {id:'2',nm:'교무실 앞 복도',use:'쌤 루트 10:50 쉬는 시간 / 고딩 루트 13:10 점심시간',must:1,t:BG+'a Korean high school hallway in front of the teachers\' office, a sliding door with a blank sign, windows on one side, lockers, bright daytime light, empty.'},
+    {id:'3',nm:'교무실 · 방과 후',use:'고딩 루트 16:20',must:1,t:BG+'a Korean high school teachers\' office in the late afternoon, warm orange sunset light through the window, desks with papers, quiet and empty.'},
+    {id:'4',nm:'교실 · 방과 후',use:'쌤 루트 16:30',must:1,t:BG+'a Korean high school classroom after school, warm orange sunset light through the windows, rows of desks, a blank green chalkboard, empty.'},
+    {id:'5',nm:'내 방 · 밤',use:'고딩 루트 22:00 메시지',must:1,t:BG+'a Korean high school student\'s bedroom at night, a desk with a lamp, a laptop and textbooks, a window showing city lights, calm blue tones with a warm lamp glow.'},
+    {id:'6',nm:'타이틀 · 교실',use:'시작 화면',t:BG+'a Korean high school classroom with a large blank green chalkboard in the center, a teacher\'s desk on the left and a student desk on the right, soft dramatic light.'},
+    {id:'7',nm:'엔딩 · 노을 교실',use:'엔딩 화면',t:BG+'a Korean high school classroom at sunset, soft golden light, a few desks, calm hopeful mood, a blank green chalkboard.'}
+  ];
+
+  function el(h){var d=document.createElement('div');d.innerHTML=h;return d.firstChild;}
+  function esc(s){return s.replace(/&/g,'&amp;').replace(/</g,'&lt;');}
+  function copyText(t,btn){
+    function ok(){btn.textContent='복사됨';btn.setAttribute('data-done','1');setTimeout(function(){btn.textContent='복사';btn.removeAttribute('data-done');},1600);}
+    function fb(){var pre=btn.closest('.item').querySelector('pre');var r=document.createRange();r.selectNodeContents(pre);var s=getSelection();s.removeAllRanges();s.addRange(r);btn.textContent='선택됨 · 길게 눌러 복사';}
+    try{navigator.clipboard.writeText(t).then(ok,fb);}catch(e){fb();}
+  }
+  function render(id,arr,kind){
+    var box=document.getElementById(id);
+    arr.forEach(function(p){
+      var it=el('<article class="item"><div class="top"><div><span class="pill '+(p.must?'must':'opt')+'">'+(p.must?'필수':'선택')+'</span><span class="pill">'+kind+p.id+'</span><div class="nm">'+p.nm+'</div><div class="use">'+p.use+'</div></div><button class="copy" type="button" id="cp-'+kind+p.id+'">복사</button></div><pre>'+esc(p.t)+'</pre></article>');
+      it.querySelector('button').onclick=function(){copyText(p.t,this);};
+      box.appendChild(it);
+    });
+  }
+  render('poses',POSES,'동작 ');render('faces',FACES,'표정 ');render('bgs',BGS,'배경 ');
+})();
+</script>

@@ -1,11 +1,33 @@
-# 나노바나나 프롬프트 모음
+# 이미지 프롬프트 모음
 
-Gemini 이미지 만들기에 `assets/characters/neutral.png` 를 참고 이미지로 올리고 아래 문장을 붙여 넣어요.
-새 동작을 만들 때는 **새 채팅**에서 시작해야 이전 동작이 안 섞여요.
+그림은 모두 이 프롬프트로 만들었어요. 결과 파일은 [assets/README.md](../assets/README.md), 만드는 순서는 [asset-pipeline.md](asset-pipeline.md) 를 보세요.
 
-## 캐릭터 동작
+- 참고 이미지: `assets/characters/source/reference_lineup.jpg`
+- **새 동작 · 표정마다 새 채팅**에서 시작해야 이전 동작이 안 섞여요.
+- 영어로 쓰는 게 결과가 더 안정적이에요.
 
-### 동작 A · 동작 A · 전화와 질문
+## 0. 기본 표정 단체 그림 (Higgsfield · Seedream 5.0 Lite · 16:9 · 1크레딧)
+
+```
+Visual novel character lineup sheet, four characters standing side by side, upper body to knees, same clean modern Korean webtoon anime style, soft cel shading, facing viewer. From left: (1) Korean male teacher mid 30s, short black hair, thin glasses, light blue shirt with navy cardigan, holding clipboard, kind but tired. (2) Korean high school boy 17, messy short black hair, navy blazer school uniform with tie, holding notebook, shy. (3) Korean mother mid 40s, shoulder-length brown hair, beige cardigan over lavender blouse, holding smartphone, worried but polite. (4) Korean high school girl 17, black low ponytail, navy blazer uniform with ribbon, earphones around neck, cheerful. Plain solid dark green background, no text, no logos.
+```
+
+## 1. 표정 (Gemini 나노바나나)
+
+### 웃음 → `happy.png`
+```
+Same four characters as the reference image, same art style, same outfits, same positions and poses, same plain green background, same framing and image size. Do not change faces, hairstyles, clothes or props. Only change the facial expressions: all four smiling warmly, eyes curved happily, light blush. No text, no watermark.
+```
+
+### 속상 → `sad.png`
+```
+Same four characters as the reference image, same art style, same outfits, same positions and poses, same plain green background, same framing and image size. Do not change faces, hairstyles, clothes or props. Only change the facial expressions: all four look sad and hurt, eyebrows raised in the middle, slightly teary eyes looking down, small frown. No text, no watermark.
+```
+
+
+## 2. 캐릭터 동작 (→ pose-a-call / pose-b-talk / pose-c-thanks)
+
+### 동작 A · 전화와 질문
 
 쓰는 곳: 쌤 루트 08:20 학부모 전화, 10:50 민준 질문 / 고딩 루트 13:10 통화 중인 박 쌤
 
@@ -13,7 +35,7 @@ Gemini 이미지 만들기에 `assets/characters/neutral.png` 를 참고 이미�
 Use the attached reference image as the character and style reference. Keep exactly the same art style (clean Korean webtoon, thin dark outlines, soft cel shading, flat pastel colors), the same four characters (same faces, hairstyles, outfits, props), the same plain green background, the same 16:9 image size and the same four columns from left to right: teacher with glasses, boy student, mother, girl student. Each character stays inside their own column at the same size so they can be cropped one by one. No text. Change only the poses and actions, keep natural neutral expressions. From left to right: (1) the teacher holds a smartphone to his ear with one hand and the clipboard in the other, listening seriously and a little tired; (2) the boy raises one hand slightly to ask a question, hesitant, the other hand holds the notebook against his chest; (3) the mother holds a smartphone to her ear with one hand, her other hand on her chest, worried, speaking; (4) the girl touches her earphone with one hand and tilts her head, listening carefully.
 ```
 
-### 동작 B · 동작 B · 진지한 대화
+### 동작 B · 진지한 대화
 
 쓰는 곳: 고딩 루트 16:20 기준표 장면 / 쌤 루트 학부모 걱정 장면 / 친구 응원
 
@@ -21,7 +43,7 @@ Use the attached reference image as the character and style reference. Keep exac
 Use the attached reference image as the character and style reference. Keep exactly the same art style (clean Korean webtoon, thin dark outlines, soft cel shading, flat pastel colors), the same four characters (same faces, hairstyles, outfits, props), the same plain green background, the same 16:9 image size and the same four columns from left to right: teacher with glasses, boy student, mother, girl student. Each character stays inside their own column at the same size so they can be cropped one by one. No text. Change only the poses and actions, keep natural neutral expressions. From left to right: (1) the teacher points at the clipboard with one finger as if explaining a table to the viewer, kind but serious; (2) the boy holds the notebook out toward the viewer with both hands, nervous, eyebrows slightly raised; (3) the mother crosses her arms, worried and a little disappointed, chin slightly lowered; (4) the girl gives a thumbs-up with one hand, encouraging.
 ```
 
-### 동작 C · 동작 C · 마무리와 감사
+### 동작 C · 마무리와 감사
 
 쓰는 곳: 쌤 루트 16:30 방과 후 / 고딩 루트 22:00 밤 메시지 / 엔딩
 
@@ -29,9 +51,9 @@ Use the attached reference image as the character and style reference. Keep exac
 Use the attached reference image as the character and style reference. Keep exactly the same art style (clean Korean webtoon, thin dark outlines, soft cel shading, flat pastel colors), the same four characters (same faces, hairstyles, outfits, props), the same plain green background, the same 16:9 image size and the same four columns from left to right: teacher with glasses, boy student, mother, girl student. Each character stays inside their own column at the same size so they can be cropped one by one. No text. Change only the poses and actions. From left to right: (1) the teacher looks down at a smartphone held in both hands, typing a message, with a soft tired smile; (2) the boy bows his head slightly with both hands in front of him, thankful, small smile; (3) the mother holds the smartphone down at her side, relieved, gentle smile, small nod; (4) the girl waves one hand cheerfully at the viewer, smiling.
 ```
 
-## 표정
+## 3. 표정 추가 (→ surprised / upset)
 
-### 표정 D · 표정 · 놀람 / 당황
+### 표정 D · 놀람 / 당황
 
 쓰는 곳: 예상 못 한 말을 들었을 때
 
@@ -39,7 +61,7 @@ Use the attached reference image as the character and style reference. Keep exac
 Use the attached reference image as the character and style reference. Keep exactly the same art style (clean Korean webtoon, thin dark outlines, soft cel shading, flat pastel colors), the same four characters (same faces, hairstyles, outfits, props), the same plain green background, the same 16:9 image size and the same four columns from left to right: teacher with glasses, boy student, mother, girl student. Each character stays inside their own column at the same size so they can be cropped one by one. No text. Same standing poses and props as the reference image. Only change the facial expressions: all four are surprised and a little flustered, wide eyes, small open mouth, one small sweat drop each.
 ```
 
-### 표정 E · 표정 · 서운함 / 화남
+### 표정 E · 서운함 / 화남
 
 쓰는 곳: 신뢰 게이지가 낮은 구간(빨간 칸)
 
@@ -47,7 +69,7 @@ Use the attached reference image as the character and style reference. Keep exac
 Use the attached reference image as the character and style reference. Keep exactly the same art style (clean Korean webtoon, thin dark outlines, soft cel shading, flat pastel colors), the same four characters (same faces, hairstyles, outfits, props), the same plain green background, the same 16:9 image size and the same four columns from left to right: teacher with glasses, boy student, mother, girl student. Each character stays inside their own column at the same size so they can be cropped one by one. No text. Same standing poses and props as the reference image. Only change the facial expressions: all four are upset and annoyed, eyebrows lowered, lips pressed together, eyes looking slightly to the side, no tears.
 ```
 
-## 배경
+## 4. 배경 (→ assets/backgrounds)
 
 ### 배경 1 · 교무실 · 오전
 

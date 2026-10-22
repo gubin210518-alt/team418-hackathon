@@ -1,0 +1,1396 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>쌤 vs 고딩 역지사지 시뮬레이터</title>
+<meta name="description" content="TEAM 418 · 2026 울산 AI 해커톤 — 서로의 하루를 직접 버텨 보며 신뢰를 되찾는 피지컬 게임">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Black+Han+Sans&family=IBM+Plex+Sans+KR:wght@400;500;600;700&family=JetBrains+Mono:wght@500;700&display=swap">
+<style>
+/* 레이아웃: 칠판 위 대전 게임 화면. VS 히어로(분필 가루) → 15칸 신뢰 게이지 → 미니게임 4종(게이지 연동) → 진행 → 모드 → AI → 구조 → 부품 → 범위·역할 */
+:root{
+  --board:#0f1d19; --board-2:#152823; --board-3:#1b322b; --line:#2a433b;
+  --chalk:#eef3ea; --dust:#9fb3a9;
+  --ssam:#f4c64e; --gooding:#5fc8f0;
+  --low:#ef5b4c; --mid:#f4a43a; --high:#5fd68a; --off:#22352f;
+  --ink-dark:#10201b; --paper:#f3efe2; --paper-ink:#4b4433; --seal:#c8352a;
+  --f-display:'Black Han Sans','Apple SD Gothic Neo','Malgun Gothic',sans-serif;
+  --f-body:'IBM Plex Sans KR',system-ui,-apple-system,'Apple SD Gothic Neo','Malgun Gothic',sans-serif;
+  --f-mono:'JetBrains Mono',ui-monospace,Menlo,monospace;
+  color-scheme:dark;
+}
+*{box-sizing:border-box}
+[hidden]{display:none!important}
+html{padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px);background:var(--board)}
+body{
+  margin:0;background:var(--board);color:var(--chalk);font-family:var(--f-body);font-size:16px;line-height:1.65;
+  word-break:keep-all;overflow-wrap:break-word;overflow-x:hidden;
+  background-image:
+    radial-gradient(ellipse at 15% -5%, rgba(244,198,78,.13), transparent 50%),
+    radial-gradient(ellipse at 90% 0%, rgba(95,200,240,.13), transparent 48%);
+  background-repeat:no-repeat;
+}
+.band{padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px))}
+.wrap{max-width:1000px;margin:0 auto}
+a{color:inherit}
+a:focus-visible,button:focus-visible,[tabindex]:focus-visible{outline:2px solid var(--chalk);outline-offset:3px}
+h1,h2,h3{word-break:keep-all;text-wrap:balance}
+h2{font-family:var(--f-display);font-weight:400;font-size:clamp(28px,5vw,40px);line-height:1.2;margin:0;position:relative;align-self:flex-start;padding-bottom:6px}
+h2::after{content:"";position:absolute;left:0;right:0;bottom:0;height:4px;border-radius:2px;background:linear-gradient(90deg,var(--ssam),var(--gooding));transform-origin:left}
+h2.pre::after{transform:scaleX(0)}
+h2.in::after{animation:draw .7s cubic-bezier(.6,0,.2,1) both}
+@keyframes draw{from{transform:scaleX(0)}to{transform:scaleX(1)}}
+h3{font-size:17px;margin:0;font-weight:600;line-height:1.4}
+p{margin:0;max-width:62ch;text-wrap:pretty}
+.tag{font-family:var(--f-mono);font-size:12.5px;letter-spacing:.03em;color:var(--dust);text-transform:uppercase}
+.small{font-size:13.5px;color:var(--dust)}
+
+/* 상단 */
+.top{display:flex;justify-content:space-between;align-items:center;gap:8px 16px;flex-wrap:wrap;padding-block:16px;border-bottom:1px dashed var(--line)}
+.top .tag b{color:var(--chalk);font-weight:700}
+.bell{display:inline-flex;align-items:center;gap:8px}
+.bell i{width:8px;height:8px;border-radius:50%;background:var(--low);box-shadow:0 0 10px var(--low);animation:blink 1.6s steps(2) infinite}
+@keyframes blink{50%{opacity:.2}}
+.nav{display:flex;gap:6px;flex-wrap:wrap}
+.nav a{text-decoration:none;font-size:14px;font-weight:600;padding:7px 14px;border-radius:999px;border:1px solid var(--line);background:var(--board-2);color:var(--chalk);transition:border-color .15s,background .15s}
+.nav a:hover{border-color:var(--chalk)}
+.nav a[aria-current="page"]{background:var(--chalk);color:var(--ink-dark);border-color:var(--chalk)}
+.diff{display:flex;flex-wrap:wrap;align-items:center;gap:8px 12px;padding:10px 14px;border-radius:10px;border:1px dashed var(--line);font-size:14px;color:var(--dust)}
+.diff b{font-family:var(--f-display);font-weight:400;font-size:18px;padding:2px 10px;border-radius:6px;color:var(--ink-dark)}
+.diff b.lv0{background:var(--low);color:#fff}.diff b.lv1{background:var(--mid)}.diff b.lv2{background:var(--high)}
+.devbox{border:1px solid var(--line);border-radius:12px;padding:0 16px}
+.devbox summary{cursor:pointer;padding:12px 0;font-weight:600;list-style:none;display:flex;justify-content:space-between;align-items:center;gap:8px}
+.devbox summary::-webkit-details-marker{display:none}
+.devbox summary::after{content:"+";font-family:var(--f-mono);font-size:18px;color:var(--dust);transition:transform .2s}
+.devbox[open] summary::after{transform:rotate(45deg)}
+.devbox[open]{padding-bottom:16px}
+.devbox .devs{margin-bottom:14px}
+.leds{cursor:pointer;touch-action:none;border-radius:8px;padding:4px;margin:-4px}
+.leds:focus-visible{outline:2px solid var(--chalk);outline-offset:4px}
+.ghint{font-size:13px;color:var(--dust)}
+.ticker{border-bottom:1px dashed var(--line);overflow:hidden;white-space:nowrap;font-family:var(--f-mono);font-size:13px;color:var(--dust);padding-block:8px}
+.ticker .track{display:inline-flex;gap:36px;animation:tick 36s linear infinite;padding-left:16px}
+.ticker b{color:var(--ssam);font-weight:500}
+.ticker em{color:var(--gooding);font-style:normal}
+@keyframes tick{to{transform:translateX(-50%)}}
+
+/* VS 히어로 */
+.herozone{position:relative;overflow:hidden}
+#dust{position:absolute;inset:0;width:100%;height:100%;pointer-events:none;z-index:0}
+.hero{position:relative;z-index:1;padding-block:40px 30px;display:flex;flex-direction:column;gap:28px}
+.vs{display:grid;grid-template-columns:minmax(0,1fr) auto minmax(0,1fr);align-items:end;gap:clamp(8px,3vw,28px);animation:quake .4s 1s both}
+@keyframes quake{20%{transform:translate(-6px,3px)}40%{transform:translate(6px,-3px)}60%{transform:translate(-4px,2px)}80%{transform:translate(3px,-1px)}}
+.side{display:flex;flex-direction:column;gap:6px;min-width:0}
+.side.l{animation:inL .7s cubic-bezier(.2,.9,.2,1.15) both}
+.side.r{text-align:right;align-items:flex-end;animation:inR .7s cubic-bezier(.2,.9,.2,1.15) both}
+@keyframes inL{from{transform:translateX(-80px) skewX(-12deg);opacity:0}}
+@keyframes inR{from{transform:translateX(80px) skewX(12deg);opacity:0}}
+.side .who{font-family:var(--f-display);font-size:clamp(60px,15vw,136px);line-height:.95;white-space:nowrap;animation:breathe 3s 1.4s ease-in-out infinite}
+.side.r .who{animation-delay:2.9s}
+@keyframes breathe{50%{transform:translateY(-4px)}}
+.side.l .who{color:var(--ssam);text-shadow:0 0 30px rgba(244,198,78,.4)}
+.side.r .who{color:var(--gooding);text-shadow:0 0 30px rgba(95,200,240,.4)}
+.side .hp{font-family:var(--f-mono);font-size:12px;color:var(--dust);white-space:nowrap}
+.side .hpbar{height:9px;width:min(260px,100%);border-radius:5px;background:var(--off);overflow:hidden}
+.side .hpbar span{display:block;height:100%;transform-origin:left;animation:hp 1.2s .5s ease-out both}
+.side.l .hpbar span{background:var(--ssam);width:72%}
+.side.r .hpbar span{background:var(--gooding);width:64%;margin-left:auto;transform-origin:right}
+@keyframes hp{from{transform:scaleX(0)}}
+.vswrap{position:relative;margin-bottom:clamp(6px,2vw,18px)}
+.vsmark{position:relative;z-index:1;display:block;font-family:var(--f-display);font-size:clamp(30px,7vw,64px);color:var(--chalk);padding:4px 12px;border:3px solid var(--chalk);border-radius:8px;line-height:1;background:var(--board);animation:slam .55s .45s cubic-bezier(.3,1.6,.5,1) both}
+@keyframes slam{from{transform:scale(2.8) rotate(-24deg);opacity:0}to{transform:scale(1) rotate(-8deg);opacity:1}}
+.vswrap::before{content:"";position:absolute;left:50%;top:50%;width:10px;height:10px;margin:-5px;border-radius:50%;box-shadow:0 0 0 0 rgba(238,243,234,.7);animation:ring 1s .95s ease-out both}
+@keyframes ring{from{box-shadow:0 0 0 0 rgba(238,243,234,.8)}to{box-shadow:0 0 0 120px rgba(238,243,234,0)}}
+.title{display:flex;flex-direction:column;gap:12px;align-items:center;text-align:center;animation:up .6s .8s ease-out both}
+@keyframes up{from{transform:translateY(14px);opacity:0}}
+.title h1{margin:0;font-family:var(--f-display);font-weight:400;font-size:clamp(34px,7vw,60px);line-height:1.1}
+.title h1 em{font-style:normal;background:linear-gradient(90deg,var(--ssam),var(--chalk) 25%,var(--gooding) 50%,var(--chalk) 75%,var(--ssam));background-size:200% 100%;-webkit-background-clip:text;background-clip:text;color:transparent;animation:shine 5s linear infinite}
+@keyframes shine{to{background-position:200% 0}}
+.title p{color:var(--dust);font-size:clamp(16px,2.4vw,19px);max-width:34ch}
+.title p b{color:var(--chalk);font-weight:600}
+.chips{display:flex;flex-wrap:wrap;gap:8px;justify-content:center}
+.chip{font-family:var(--f-mono);font-size:12.5px;padding:5px 11px;border:1px solid var(--line);border-radius:999px;background:var(--board-2);white-space:nowrap;animation:up .5s both}
+.chip:nth-child(1){animation-delay:1s}.chip:nth-child(2){animation-delay:1.08s}.chip:nth-child(3){animation-delay:1.16s}.chip:nth-child(4){animation-delay:1.24s}
+
+/* 게이지 */
+.gauge{background:var(--board-2);border:1px solid var(--line);border-radius:14px;padding:20px clamp(14px,3vw,26px);display:flex;flex-direction:column;gap:14px;position:relative}
+.ghead{display:flex;justify-content:space-between;align-items:center;gap:8px 12px;flex-wrap:wrap}
+.val{font-family:var(--f-mono);font-weight:700;font-size:22px;font-variant-numeric:tabular-nums}
+.leds{display:grid;grid-template-columns:repeat(15,minmax(0,1fr));gap:clamp(3px,1vw,8px)}
+.led{aspect-ratio:1;max-width:100%;border-radius:50%;background:var(--off);border:1px solid #2f4840;transition:background .25s,box-shadow .25s,transform .25s}
+.led.on.low{background:var(--low);box-shadow:0 0 12px var(--low)}
+.led.on.mid{background:var(--mid);box-shadow:0 0 12px var(--mid)}
+.led.on.high{background:var(--high);box-shadow:0 0 14px var(--high)}
+.led.wave{animation:wave .45s ease-out}
+@keyframes wave{40%{transform:scale(1.45)}}
+.gctl{display:flex;flex-wrap:wrap;gap:10px;align-items:center}
+.gmsg{color:var(--dust);font-size:14.5px;min-height:1.65em}
+.gmsg b{color:var(--chalk)}
+.gauge.bump{animation:bump .4s}
+.gauge.hurt{animation:hurt .35s}
+@keyframes bump{40%{box-shadow:0 0 0 3px var(--high),0 0 30px rgba(95,214,138,.35)}}
+@keyframes hurt{20%,60%{transform:translateX(-6px)}40%,80%{transform:translateX(6px)}}
+.minig{position:fixed;right:max(12px,env(safe-area-inset-right,0px));bottom:calc(12px + env(safe-area-inset-bottom,0px));z-index:40;background:var(--board-2);border:1px solid var(--line);border-radius:999px;padding:8px 12px;display:flex;align-items:center;gap:8px;box-shadow:0 6px 18px rgba(0,0,0,.4);font-family:var(--f-mono);font-size:12px;transition:transform .3s,opacity .3s}
+.minig.hide{transform:translateY(20px);opacity:0;pointer-events:none}
+.minig .dots{display:grid;grid-template-columns:repeat(15,6px);gap:2px}
+.minig .dots i{width:6px;height:6px;border-radius:50%;background:var(--off)}
+.minig .dots i.on.low{background:var(--low)}.minig .dots i.on.mid{background:var(--mid)}.minig .dots i.on.high{background:var(--high)}
+
+/* 버튼 */
+.btn{font:inherit;font-weight:700;font-size:15px;cursor:pointer;border-radius:999px;padding:10px 18px;border:0;color:var(--ink-dark);display:inline-flex;align-items:center;justify-content:center;gap:8px;box-shadow:0 4px 0 rgba(0,0,0,.45);transition:transform .08s,box-shadow .08s,filter .15s;white-space:nowrap}
+.btn:hover{filter:brightness(1.1)}
+.btn:active{transform:translateY(3px);box-shadow:0 1px 0 rgba(0,0,0,.45)}
+.btn:disabled{opacity:.45;cursor:default}
+.btn.help{background:var(--high)}
+.btn.dump{background:var(--low);color:#fff}
+.btn.ssam{background:var(--ssam)}
+.btn.goo{background:var(--gooding)}
+.btn.ghost{background:transparent;color:var(--dust);border:1px solid var(--line);box-shadow:none}
+.btn.pulse{animation:pulse 1s ease-in-out infinite}
+@keyframes pulse{50%{box-shadow:0 4px 0 rgba(0,0,0,.45),0 0 0 6px rgba(244,198,78,.25)}}
+
+/* 효과 */
+.spark{position:fixed;width:7px;height:7px;border-radius:2px;pointer-events:none;z-index:60;animation:spark .65s cubic-bezier(.1,.7,.3,1) forwards}
+@keyframes spark{to{transform:translate(var(--dx),var(--dy)) rotate(var(--rot)) scale(.2);opacity:0}}
+.fx{position:fixed;pointer-events:none;z-index:61;font-family:var(--f-display);font-size:22px;white-space:nowrap;text-shadow:0 2px 0 rgba(0,0,0,.5);animation:fx .9s ease-out forwards;transform:translate(-50%,-50%)}
+@keyframes fx{0%{transform:translate(-50%,-50%) scale(.4)}25%{transform:translate(-50%,-80%) scale(1.15)}100%{transform:translate(-50%,-170%) scale(1);opacity:0}}
+.banner{position:fixed;left:50%;top:42%;z-index:70;pointer-events:none;font-family:var(--f-display);font-size:clamp(44px,12vw,110px);white-space:nowrap;color:var(--high);text-shadow:0 0 40px rgba(95,214,138,.6),0 6px 0 rgba(0,0,0,.5);animation:banner 1.6s cubic-bezier(.3,1.5,.5,1) forwards}
+.banner.bad{color:var(--low);text-shadow:0 0 40px rgba(239,91,76,.6),0 6px 0 rgba(0,0,0,.5)}
+@keyframes banner{0%{transform:translate(-50%,-50%) scale(3) rotate(-10deg);opacity:0}20%{transform:translate(-50%,-50%) scale(1) rotate(-4deg);opacity:1}80%{transform:translate(-50%,-50%) scale(1) rotate(-4deg);opacity:1}100%{transform:translate(-50%,-50%) scale(.9) rotate(-4deg);opacity:0}}
+.confetti{position:fixed;top:-12px;width:9px;height:14px;z-index:50;pointer-events:none;animation:fall 1.6s ease-in forwards}
+@keyframes fall{to{transform:translateY(105vh) rotate(720deg)}}
+
+/* 섹션 */
+section.blk{padding-block:50px;border-top:1px dashed var(--line)}
+section.blk>.wrap{display:flex;flex-direction:column;gap:18px}
+.lede{color:var(--dust);font-size:17px}
+.lede b{color:var(--chalk)}
+
+/* 미니게임 */
+.games{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:14px}
+@media (max-width:820px){.games{grid-template-columns:minmax(0,1fr)}}
+.game{background:var(--board-2);border:1px solid var(--line);border-radius:14px;padding:18px;display:flex;flex-direction:column;gap:12px;min-width:0;transition:border-color .2s,transform .2s}
+.game:hover{border-color:#3d5c52}
+.game .gtop{display:flex;justify-content:space-between;align-items:center;gap:8px}
+.who-tag{font-family:var(--f-mono);font-size:11px;font-weight:700;padding:3px 8px;border-radius:4px;white-space:nowrap}
+.who-tag.s{background:var(--ssam);color:#1a1606}
+.who-tag.g{background:var(--gooding);color:#04202b}
+.game>p{font-size:14.5px;color:var(--dust)}
+.stage{position:relative;min-height:190px;border-radius:10px;background:var(--board-3);border:1px dashed var(--line);display:flex;align-items:center;justify-content:center;overflow:hidden;user-select:none;-webkit-user-select:none;touch-action:manipulation;transition:background .2s,border-color .2s}
+.result{font-family:var(--f-mono);font-size:14px;min-height:1.65em;color:var(--chalk)}
+.good{color:var(--high)} .bad{color:var(--low)}
+.row{display:flex;gap:8px;flex-wrap:wrap}
+.row .btn{flex:1 1 auto}
+
+/* 게임 1: 민원 전화 */
+.phone{display:flex;flex-direction:column;align-items:center;gap:6px;padding:12px}
+.phone svg{width:76px;height:76px}
+.phone .ptxt{font-family:var(--f-display);font-size:22px;color:var(--dust)}
+.stage.ring{background:#3a1f1c;border-color:var(--low)}
+.stage.ring .phone svg{animation:shake .12s linear infinite;color:var(--low)}
+.stage.ring .ptxt{color:var(--low)}
+.stage.ring::before,.stage.ring::after{content:"";position:absolute;left:50%;top:42%;width:80px;height:80px;margin:-40px;border:2px solid var(--low);border-radius:50%;animation:ripple 1s ease-out infinite}
+.stage.ring::after{animation-delay:.5s}
+@keyframes ripple{from{transform:scale(.6);opacity:.9}to{transform:scale(2.6);opacity:0}}
+@keyframes shake{25%{transform:rotate(-14deg)}75%{transform:rotate(14deg)}}
+.call{display:flex;flex-direction:column;gap:10px;width:100%;padding:14px;align-self:stretch;justify-content:center}
+.call .from{font-family:var(--f-mono);font-size:12px;color:var(--dust);display:flex;justify-content:space-between;gap:8px}
+.bubble{background:var(--paper);color:#1d1a12;border-radius:14px 14px 14px 4px;padding:12px 14px;font-size:15.5px;font-weight:500;line-height:1.5;animation:bub .35s cubic-bezier(.3,1.5,.5,1) both}
+@keyframes bub{from{transform:scale(.6) translateY(10px);opacity:0}}
+.choices{display:flex;flex-direction:column;gap:8px}
+.choice{font:inherit;font-size:14.5px;text-align:left;cursor:pointer;padding:10px 12px;border-radius:10px;border:1px solid var(--line);background:var(--board-3);color:var(--chalk);line-height:1.45;transition:border-color .15s,background .15s,transform .1s;animation:up .3s both}
+.choice:nth-child(2){animation-delay:.06s}.choice:nth-child(3){animation-delay:.12s}
+.choice:hover:not(:disabled){border-color:var(--ssam);transform:translateX(3px)}
+.choice:disabled{cursor:default}
+.choice.right{border-color:var(--high);background:rgba(95,214,138,.15)}
+.choice.wrong{border-color:var(--low);background:rgba(239,91,76,.15)}
+.choice.meh{border-color:var(--mid);background:rgba(244,164,58,.13)}
+.why{font-size:13.5px;color:var(--dust);min-height:1.5em}
+.pips{display:flex;gap:6px}
+.pips i{width:22px;height:6px;border-radius:3px;background:var(--off)}
+.pips i.good{background:var(--high)}.pips i.meh{background:var(--mid)}.pips i.bad{background:var(--low)}
+
+/* 게임 2: 도장 */
+.paper{position:absolute;inset:14px 18px;background:var(--paper);border-radius:4px;box-shadow:0 3px 0 rgba(0,0,0,.35);cursor:pointer}
+.paper::before{content:"결재 서류";position:absolute;top:10px;left:12px;font-family:var(--f-display);font-size:15px;color:var(--paper-ink)}
+.paper::after{content:"";position:absolute;left:12px;right:12px;top:38px;height:70px;background:repeating-linear-gradient(#cfc7b2 0 1px,transparent 1px 12px)}
+.paper.hit{animation:thump .1s}
+@keyframes thump{50%{transform:scale(.985) translateY(2px)}}
+.stamp{position:absolute;width:44px;height:44px;margin:-22px 0 0 -22px;border:3px solid var(--seal);border-radius:50%;color:var(--seal);font-family:var(--f-display);font-size:14px;display:flex;align-items:center;justify-content:center;opacity:.85;animation:thunk .18s ease-out both;pointer-events:none;z-index:1}
+@keyframes thunk{from{transform:scale(1.9) rotate(var(--r));opacity:0}to{transform:scale(1) rotate(var(--r));opacity:.85}}
+.count{position:absolute;right:30px;bottom:20px;line-height:1;font-family:var(--f-mono);font-weight:700;font-size:30px;color:var(--paper-ink);z-index:2;pointer-events:none}
+.count.pop{animation:cnt .15s}
+@keyframes cnt{50%{transform:scale(1.35)}}
+.timer{height:6px;border-radius:3px;background:var(--off);overflow:hidden}
+.timer span{display:block;height:100%;width:100%;transform-origin:left}
+#g2timer{background:var(--ssam)} #g4timer{background:var(--gooding)}
+
+/* 게임 3: 질문 타이밍 */
+.desk{display:flex;flex-direction:column;align-items:center;gap:8px}
+.lamp{width:66px;height:66px;border-radius:50%;background:var(--off);border:3px solid var(--line);transition:background .12s,box-shadow .12s,transform .12s}
+.lamp.free{background:var(--high);box-shadow:0 0 30px var(--high);transform:scale(1.06)}
+.lamp.busy{background:var(--low);box-shadow:0 0 30px var(--low)}
+.desk .state{font-family:var(--f-display);font-size:20px}
+
+/* 게임 4: 할 일 카드 러시 */
+.slots{position:absolute;inset:10px;display:grid;grid-template-columns:repeat(3,minmax(0,1fr));grid-template-rows:repeat(2,minmax(0,1fr));gap:8px}
+.slot{position:relative;min-width:0}
+.card{position:absolute;inset:0;border:0;border-radius:9px;cursor:pointer;font:inherit;font-size:13.5px;font-weight:700;line-height:1.3;padding:8px 8px 14px;display:flex;align-items:center;justify-content:center;text-align:center;color:#04202b;background:var(--gooding);box-shadow:0 3px 0 rgba(0,0,0,.4);animation:cardin .22s cubic-bezier(.3,1.6,.5,1) both;overflow:hidden}
+.card.trap{background:#e6e0f5;color:#2a1d4a}
+.card.trap::before{content:"딴짓";position:absolute;top:4px;left:6px;font-family:var(--f-mono);font-size:10px;color:#7a62b8}
+.card .life{position:absolute;left:6px;right:6px;bottom:5px;height:4px;border-radius:2px;background:rgba(0,0,0,.18);overflow:hidden}
+.card .life span{display:block;height:100%;background:rgba(0,0,0,.45);transform-origin:left;animation:life linear forwards}
+@keyframes life{to{transform:scaleX(0)}}
+.card.gone{animation:cardout .3s ease-in forwards;pointer-events:none}
+.card.miss{animation:cardmiss .35s ease-in forwards;pointer-events:none}
+@keyframes cardin{from{transform:scale(.3) rotate(-8deg);opacity:0}}
+@keyframes cardout{to{transform:translateY(-60px) scale(.6) rotate(10deg);opacity:0}}
+@keyframes cardmiss{to{transform:translateY(20px) scale(.9);opacity:0;filter:grayscale(1)}}
+.idle{font-family:var(--f-display);font-size:20px;color:var(--dust);text-align:center;padding:12px}
+
+/* 문제 */
+.split{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px}
+@media (max-width:640px){.split{grid-template-columns:minmax(0,1fr)}}
+.quote{border-radius:12px;padding:16px 18px;background:var(--board-2);border:1px solid var(--line);display:flex;flex-direction:column;gap:6px}
+.quote.s{border-left:4px solid var(--ssam)} .quote.s .tag{color:var(--ssam)}
+.quote.g{border-left:4px solid var(--gooding)} .quote.g .tag{color:var(--gooding)}
+.quote p{font-size:17px}
+
+/* 진행 */
+.steps{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:12px}
+@media (max-width:760px){.steps{grid-template-columns:minmax(0,1fr)}}
+.step{background:var(--board-2);border:1px solid var(--line);border-radius:12px;padding:16px 18px;display:grid;grid-template-columns:auto minmax(0,1fr);gap:4px 14px;align-items:start;transition:transform .2s,border-color .2s}
+.step:hover{transform:translateY(-4px) rotate(-.4deg);border-color:var(--chalk)}
+.step .no{grid-row:span 2;font-family:var(--f-display);font-size:40px;line-height:1}
+.step p{font-size:15px;color:var(--dust)}
+
+/* 모드 탭 */
+.tabs{display:flex;gap:8px;flex-wrap:wrap}
+.tab{font:inherit;font-family:var(--f-display);font-size:20px;cursor:pointer;padding:10px 22px;border-radius:12px;border:2px solid var(--line);background:transparent;color:var(--dust);transition:background .2s,color .2s,border-color .2s,transform .1s}
+.tab:active{transform:scale(.96)}
+.tab[aria-selected="true"].s{border-color:var(--ssam);color:#1a1606;background:var(--ssam)}
+.tab[aria-selected="true"].g{border-color:var(--gooding);color:#04202b;background:var(--gooding)}
+.panel{border:1px solid var(--line);border-radius:14px;background:var(--board-2);padding:18px clamp(14px,3vw,24px);display:flex;flex-direction:column;gap:16px;animation:fade .35s ease-out}
+@keyframes fade{from{transform:translateY(8px);opacity:.3}}
+.devs{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:10px}
+@media (max-width:700px){.devs{grid-template-columns:minmax(0,1fr)}}
+.dev{border:1px dashed var(--line);border-radius:10px;padding:12px 14px;display:flex;flex-direction:column;gap:4px;transition:border-color .2s}
+.dev:hover{border-style:solid;border-color:var(--chalk)}
+.dev .part{font-family:var(--f-mono);font-size:12px;color:var(--dust)}
+.dev p{font-size:14.5px;color:var(--dust)}
+.events{display:flex;flex-direction:column;gap:8px}
+.ev{display:grid;grid-template-columns:52px minmax(0,1fr);gap:12px;align-items:baseline;font-size:15px}
+.ev time{font-family:var(--f-mono);font-size:13px;color:var(--dust);font-variant-numeric:tabular-nums}
+
+/* AI */
+.ai{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px}
+@media (max-width:640px){.ai{grid-template-columns:minmax(0,1fr)}}
+.aibox{border-radius:12px;padding:16px 18px;border:1px solid var(--line);background:var(--board-2);display:flex;flex-direction:column;gap:8px}
+.aibox .sw{font-family:var(--f-mono);font-size:12px;font-weight:700;align-self:flex-start;padding:3px 8px;border-radius:4px}
+.aibox.on .sw{background:var(--high);color:#0b2416;animation:pulseon 2s ease-in-out infinite}
+@keyframes pulseon{50%{box-shadow:0 0 14px var(--high)}}
+.aibox.off .sw{background:var(--off);color:var(--chalk);border:1px solid var(--line)}
+.aibox p{font-size:15px;color:var(--dust)}
+
+/* 구조 */
+.arch{display:grid;grid-template-columns:minmax(0,1fr) 56px minmax(0,1fr) 56px minmax(0,1fr) 56px minmax(0,1fr);align-items:stretch;border:1px solid var(--line);border-radius:14px;background:var(--board-2);padding:18px}
+@media (max-width:760px){.arch{grid-template-columns:minmax(0,1fr)}.arch .wire{height:42px;flex-direction:row}.arch .wire::before{width:2px!important;height:100%!important;background:repeating-linear-gradient(180deg,var(--chalk) 0 6px,transparent 6px 10px)!important;background-size:2px 20px!important;animation-name:flowv!important}}
+.node{border:1.5px solid var(--chalk);border-radius:10px;padding:12px;display:flex;flex-direction:column;gap:4px;min-width:0}
+.node.opt{border-style:dashed;border-color:var(--dust)}
+.node b{font-size:15px}
+.node span{font-size:13px;color:var(--dust)}
+.wire{display:flex;flex-direction:column;justify-content:center;align-items:center;gap:4px;font-family:var(--f-mono);font-size:11px;color:var(--dust)}
+.wire::before{content:"";display:block;width:100%;height:2px;background:repeating-linear-gradient(90deg,var(--chalk) 0 6px,transparent 6px 10px);background-size:20px 2px;animation:flow .8s linear infinite}
+@keyframes flow{to{background-position:20px 0}}
+@keyframes flowv{to{background-position:0 20px}}
+
+/* 부품 */
+.tablebox{overflow-x:auto;border:1px solid var(--line);border-radius:14px;background:var(--board-2)}
+table{border-collapse:collapse;width:100%;min-width:600px;font-size:14.5px}
+th,td{text-align:left;padding:11px 14px;border-bottom:1px solid var(--line);vertical-align:middle;white-space:nowrap}
+th{font-family:var(--f-mono);font-size:12px;color:var(--dust);font-weight:500}
+td.n,th.n{font-family:var(--f-mono);font-variant-numeric:tabular-nums;text-align:right}
+td a{color:var(--gooding);text-underline-offset:3px}
+tbody tr{transition:background .15s}
+tbody tr:hover{background:var(--board-3)}
+tfoot td{border-bottom:0;font-weight:700}
+tfoot td.n{color:var(--ssam);font-size:17px}
+
+/* 범위·역할 */
+.scope{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px}
+@media (max-width:640px){.scope{grid-template-columns:minmax(0,1fr)}}
+.scope .box{border:1px solid var(--line);border-radius:12px;background:var(--board-2);padding:16px 18px;display:flex;flex-direction:column;gap:10px}
+.scope .box.must{border-color:var(--high)}
+.scope ul{margin:0;padding-left:1.15em;display:flex;flex-direction:column;gap:5px;font-size:15px;color:var(--dust)}
+.scope li b{color:var(--chalk);font-weight:500}
+.roles{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:14px}
+@media (max-width:700px){.roles{grid-template-columns:minmax(0,1fr)}}
+.role{border-top:3px solid var(--chalk);padding-top:12px;display:flex;flex-direction:column;gap:4px}
+.role p{font-size:15px;color:var(--dust)}
+.effects{margin:0;padding:0;list-style:none;display:flex;flex-direction:column;gap:10px}
+.effects li{display:grid;grid-template-columns:20px minmax(0,1fr);gap:10px;font-size:16.5px}
+.effects li::before{content:"✓";font-family:var(--f-mono);color:var(--high);font-weight:700}
+
+footer{padding-block:28px 72px;border-top:1px dashed var(--line);color:var(--dust);font-size:13.5px}
+footer .wrap{display:flex;justify-content:space-between;gap:8px 12px;flex-wrap:wrap}
+
+
+/* 보강 섹션 */
+
+/* 미연시 */
+.sr{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0)}
+.vn{border:1.5px solid var(--line);border-radius:18px;background:var(--board-2);overflow:hidden}
+.vnpick{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px;padding:16px}
+@media (max-width:640px){.vnpick{grid-template-columns:minmax(0,1fr)}}
+.route{font:inherit;color:inherit;text-align:left;cursor:pointer;display:flex;flex-direction:column;gap:4px;padding:20px 22px;border-radius:14px;background:var(--board);border:2px solid var(--line);transition:transform .15s,border-color .15s}
+.route:hover{transform:translateY(-3px)}
+.route b{font-family:var(--f-display);font-weight:400;font-size:30px}
+.route span:last-child{color:var(--dust);font-size:14.5px}
+.route.s{border-color:var(--ssam)} .route.s b{color:var(--ssam)}
+.route.g{border-color:var(--gooding)} .route.g b{color:var(--gooding)}
+.vnscene{position:relative;height:clamp(220px,40vw,360px);overflow:hidden;border-bottom:1px solid var(--line)}
+.vnscene.bg-office{background:linear-gradient(180deg,#2a3a33 0 62%,#1d2a25 62%),#2a3a33}
+.vnscene.bg-hall{background:repeating-linear-gradient(90deg,transparent 0 120px,rgba(255,255,255,.04) 120px 124px),linear-gradient(180deg,#24352f 0 66%,#3a3226 66%)}
+.vnscene.bg-class{background:linear-gradient(180deg,#1e3a2e 0 18%,#264337 18% 60%,#3a3226 60%)}
+.vnscene.bg-night{background:radial-gradient(circle at 80% 22%,rgba(244,198,78,.35),transparent 12%),linear-gradient(180deg,#0d1424 0 70%,#1a1f2c 70%)}
+.vnscene::after{content:"";position:absolute;inset:0;background:linear-gradient(180deg,transparent 55%,rgba(0,0,0,.45))}
+.vnwhere{position:absolute;left:16px;top:14px;z-index:2;display:flex;gap:10px;align-items:baseline;background:rgba(0,0,0,.45);padding:6px 12px;border-radius:999px}
+.vnwhere span{font-family:var(--f-mono);font-size:13px;color:var(--dust)}
+.vnwhere b{font-size:14px}
+.vnstep{position:absolute;right:16px;top:20px;z-index:2;display:flex;gap:6px}
+.vnstep i{width:22px;height:6px;border-radius:3px;background:rgba(255,255,255,.18)}
+.vnstep i.done{background:var(--dust)} .vnstep i.now{background:var(--chalk)}
+.vnchar{position:absolute;left:50%;bottom:-6px;width:clamp(150px,26vw,230px);transform:translateX(-50%);z-index:1}
+.vnchar svg{display:block;width:100%;height:auto}
+.vnchar .hd,.vnchar .bd{fill:currentColor}
+.vnchar .bd{opacity:.85}
+.vnchar .ey{fill:#10201b}
+.vnchar .mo{fill:none;stroke:#10201b;stroke-width:5;stroke-linecap:round}
+.vnchar.in{animation:vnin .45s cubic-bezier(.2,1.4,.4,1) both}
+@keyframes vnin{from{opacity:0;transform:translate(-50%,24px)}to{opacity:1;transform:translate(-50%,0)}}
+.vnbox{padding:16px 18px 18px;display:flex;flex-direction:column;gap:12px;position:relative}
+.vnname{align-self:flex-start;font-weight:700;font-size:14px;color:#10201b;padding:3px 12px;border-radius:999px;margin-top:-30px;position:relative;z-index:3;box-shadow:0 3px 0 rgba(0,0,0,.4)}
+.vntext{margin:0;font-size:17.5px;line-height:1.7;min-height:3.4em;cursor:pointer}
+.vntext .said{display:block;color:var(--dust);font-size:15px;margin-bottom:4px}
+.vntext .res{font-family:var(--f-mono);font-weight:700;margin-right:6px}
+.vntext .res.up{color:var(--high)} .vntext .res.down{color:var(--low)} .vntext .res.mid{color:var(--mid)}
+.vnchoices{display:flex;flex-direction:column;gap:8px}
+.vnc{font:inherit;color:inherit;text-align:left;cursor:pointer;display:grid;grid-template-columns:28px minmax(0,1fr);gap:10px;align-items:start;padding:11px 14px;border-radius:12px;background:var(--board);border:1.5px solid var(--line);transition:border-color .15s,transform .15s;animation:up .3s both}
+.vnc:nth-child(2){animation-delay:.06s}.vnc:nth-child(3){animation-delay:.12s}
+.vnc:hover{border-color:var(--chalk);transform:translateX(3px)}
+.vnc .k{font-family:var(--f-mono);font-weight:700;color:var(--dust)}
+.r-s .vnc:hover{border-color:var(--ssam)} .r-g .vnc:hover{border-color:var(--gooding)}
+.vnchoices .btn{align-self:flex-end}
+.vnfree{display:flex;gap:8px}
+.vnfree input{flex:1;min-width:0;font:inherit;font-size:16px;color:var(--chalk);background:var(--board);border:1.5px dashed var(--line);border-radius:12px;padding:10px 12px}
+.vnfree input:focus{outline:2px solid var(--chalk);outline-offset:1px}
+.vnend{padding:22px;display:flex;flex-direction:column;gap:10px}
+.vnend h3{font-family:var(--f-display);font-weight:400;font-size:clamp(30px,6vw,44px)}
+.vnend .tt{font-size:16px}
+.vnend ol{margin:0;padding-left:1.3em;display:flex;flex-direction:column;gap:5px;color:var(--dust)}
+.vnend .row{display:flex;gap:8px;flex-wrap:wrap;margin-top:6px}
+
+.boothfig{border:1px solid var(--line);border-radius:16px;background:var(--board-2);padding:10px}
+.boothfig svg{display:block;width:100%;height:auto}
+.boothfig .desk{fill:#132520;stroke:var(--line);stroke-width:2}
+.boothfig .mon{fill:#0b1512;stroke:var(--chalk);stroke-width:2.5}
+.boothfig .pad{fill:#0b1512;stroke-width:3}
+.boothfig .pad.s{stroke:var(--ssam)} .boothfig .pad.g{stroke:var(--gooding)}
+.boothfig .lap{fill:#0b1512;stroke:var(--dust);stroke-width:2}
+.boothfig .qr{fill:none;stroke:var(--dust);stroke-width:2}
+.boothfig .ledbox{fill:none;stroke:var(--high);stroke-width:2;stroke-dasharray:6 5}
+.boothfig .btn{fill:none;stroke-width:3;stroke-dasharray:6 5}
+.boothfig .btn.s{stroke:var(--ssam)} .boothfig .btn.g{stroke:var(--gooding)}
+.boothfig text{font-family:var(--f-body)}
+.boothfig .lab{fill:var(--dust);font-size:15px;font-family:var(--f-mono)}
+.boothfig .t1{fill:var(--chalk);font-size:24px;font-family:var(--f-display)}
+.boothfig .t1.sm{font-size:19px}
+.boothfig .t1.s{fill:var(--ssam)} .boothfig .t1.g{fill:var(--gooding)}
+.boothfig .t2{fill:var(--dust);font-size:14px}
+.boothfig .t3{fill:var(--dust);font-size:13.5px;font-family:var(--f-mono)}
+.kit{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px}
+@media (max-width:640px){.kit{grid-template-columns:minmax(0,1fr)}}
+.kc{border:1.5px solid var(--chalk);border-radius:12px;padding:14px 16px;display:flex;flex-direction:column;gap:4px}
+.kc span{color:var(--dust);font-size:15px}
+.kc.opt{border-style:dashed;border-color:var(--dust)}
+
+.vbox{border:1.5px solid var(--line);border-radius:16px;overflow:hidden;background:#0b1512;box-shadow:0 18px 40px rgba(0,0,0,.35)}
+.vbox video{display:block;width:100%;height:auto;aspect-ratio:16/9}
+
+.topics{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px}
+@media (max-width:640px){.topics{grid-template-columns:minmax(0,1fr)}}
+.tp{display:grid;grid-template-columns:40px minmax(0,1fr);gap:12px;align-items:center;border:1px solid var(--line);border-radius:12px;padding:12px 14px;background:var(--board-2);opacity:.55}
+.tp .no{width:40px;height:40px;border-radius:50%;display:grid;place-items:center;font-family:var(--f-display);font-size:20px;border:1.5px solid var(--line)}
+.tp div{display:flex;flex-direction:column;gap:2px}
+.tp div span{font-family:var(--f-mono);font-size:12px;color:var(--dust)}
+.tp.on{opacity:1;border:2px solid var(--high);background:linear-gradient(110deg,rgba(95,214,138,.14),transparent)}
+.tp.on .no{background:var(--high);border-color:var(--high);color:#0b2416}
+.tp.on div span{color:var(--high)}
+.tp.sub{opacity:.85;border-style:dashed}
+table.map td{width:50%}
+table.map td:first-child{color:var(--dust)}
+
+.gaps{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:12px}
+@media (max-width:760px){.gaps{grid-template-columns:minmax(0,1fr)}}
+.gap{background:var(--board-2);border:1px solid var(--line);border-radius:12px;padding:16px 18px;display:flex;flex-direction:column;gap:6px}
+.gap .no,.job .no{font-family:var(--f-mono);font-size:12px;color:var(--dust)}
+.gap p,.job p{font-size:15px;color:var(--dust);margin:0}
+.answer,.safe,.trace{border:1px solid var(--chalk);border-radius:14px;padding:16px 20px;display:flex;flex-direction:column;gap:8px}
+.answer ul,.safe ul{margin:0;padding-left:1.15em;display:flex;flex-direction:column;gap:6px;color:var(--dust)}
+.answer b,.safe b,.trace b{color:var(--chalk)}
+.flow{list-style:none;margin:0;padding:0;display:flex;flex-direction:column;gap:0;position:relative}
+.flow li{display:grid;grid-template-columns:44px minmax(0,1fr);gap:14px;padding:0 0 18px;position:relative}
+.flow li:not(:last-child)::before{content:"";position:absolute;left:21px;top:44px;bottom:0;width:2px;background:repeating-linear-gradient(180deg,var(--line) 0 6px,transparent 6px 10px)}
+.flow .no{width:44px;height:44px;border-radius:50%;display:grid;place-items:center;font-family:var(--f-display);font-size:22px;background:var(--board-3);border:1.5px solid var(--chalk)}
+.flow li:nth-child(odd) .no{border-color:var(--ssam);color:var(--ssam)}
+.flow li:nth-child(even) .no{border-color:var(--gooding);color:var(--gooding)}
+.flow p{margin:2px 0 0;font-size:15px;color:var(--dust)}
+table.cmp{min-width:560px}
+table.cmp th,table.cmp td{white-space:normal;vertical-align:top}
+table.cmp tbody th{font-family:var(--f-body);font-size:14px;color:var(--dust);white-space:nowrap}
+table.cmp thead th{font-family:var(--f-display);font-size:19px;font-weight:400}
+table.cmp thead th.s{color:var(--ssam)} table.cmp thead th.g{color:var(--gooding)}
+table.cmp td{width:42%}
+.zones{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:12px}
+@media (max-width:700px){.zones{grid-template-columns:minmax(0,1fr)}}
+.zone{background:var(--board-2);border:1px solid var(--line);border-radius:12px;padding:16px 18px;display:flex;flex-direction:column;gap:6px}
+.zone span{font-size:14.5px;color:var(--dust)}
+.zone em{font-style:normal;font-size:14px;font-family:var(--f-mono)}
+.zbar{display:flex;gap:5px;margin-bottom:4px}
+.zbar i{flex:1;height:12px;border-radius:3px}
+.zone.low{border-top:4px solid var(--low)} .zone.low i{background:var(--low);box-shadow:0 0 8px var(--low)} .zone.low em{color:var(--low)}
+.zone.mid{border-top:4px solid var(--mid)} .zone.mid i{background:var(--mid);box-shadow:0 0 8px var(--mid)} .zone.mid em{color:var(--mid)}
+.zone.high{border-top:4px solid var(--high)} .zone.high i{background:var(--high);box-shadow:0 0 8px var(--high)} .zone.high em{color:var(--high)}
+.aijobs{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:12px}
+@media (max-width:820px){.aijobs{grid-template-columns:minmax(0,1fr)}}
+.job{background:var(--board-2);border:1px solid var(--line);border-radius:12px;padding:16px 18px;display:flex;flex-direction:column;gap:6px}
+.job .io{margin-top:auto;font-size:14px;background:var(--board);border:1px dashed var(--line);border-radius:8px;padding:9px 11px;color:var(--chalk)}
+.job .io span{font-family:var(--f-mono);font-size:11px;color:var(--high);margin-right:6px}
+.trace ol{margin:0;padding-left:1.3em;display:flex;flex-direction:column;gap:6px;color:var(--dust)}
+.cta{display:grid;grid-template-columns:minmax(0,1fr) auto;gap:4px 16px;align-items:center;text-decoration:none;border:1.5px solid var(--chalk);border-radius:16px;padding:20px 22px;background:linear-gradient(110deg,rgba(244,198,78,.12),rgba(95,200,240,.12));transition:transform .2s}
+.cta:hover{transform:translateY(-3px)}
+.cta>*:not(.go){grid-column:1}
+.cta b{font-family:var(--f-display);font-weight:400;font-size:clamp(22px,4vw,30px);line-height:1.25}
+.cta .sub{color:var(--dust);font-size:14.5px}
+.cta .go{grid-column:2;grid-row:1/span 3;font-size:34px;font-family:var(--f-mono)}
+.plan{list-style:none;margin:0;padding:0;display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:10px}
+@media (max-width:760px){.plan{grid-template-columns:minmax(0,1fr) minmax(0,1fr)}}
+.plan li{border-top:3px solid var(--line);padding-top:10px;display:flex;flex-direction:column;gap:2px}
+.plan li:nth-child(odd){border-color:var(--ssam)} .plan li:nth-child(even){border-color:var(--gooding)}
+.plan span{font-size:14.5px;color:var(--dust)}
+@media (prefers-reduced-motion:reduce){
+  *,*::before,*::after{animation:none!important;transition:none!important}
+  #dust{display:none}
+}
+</style>
+</head>
+<body>
+
+<header>
+  <div class="band"><div class="wrap top">
+    <span class="tag bell"><i aria-hidden="true"></i><b>TEAM 418</b> · 2026 울산 AI 해커톤</span>
+    <nav class="nav" aria-label="페이지">
+      <a href="index.html" aria-current="page">프로젝트 소개</a>
+      <a href="build.html">화면 · 대본 · 준비물</a>
+    </nav>
+  </div></div>
+  <div class="ticker" aria-hidden="true"><div class="track">
+    <span><b>쌤</b> 민원 전화 3통 대기 중</span><span><em>고딩</em> 수행평가 마감 D-1</span><span><b>쌤</b> 결재 서류 5장 도착</span><span><em>고딩</em> 질문하러 갔는데 쌤 통화 중</span><span><b>쌤</b> 학부모 문자 1건</span><span><em>고딩</em> 학원 끝나고 22:00</span>
+    <span><b>쌤</b> 민원 전화 3통 대기 중</span><span><em>고딩</em> 수행평가 마감 D-1</span><span><b>쌤</b> 결재 서류 5장 도착</span><span><em>고딩</em> 질문하러 갔는데 쌤 통화 중</span><span><b>쌤</b> 학부모 문자 1건</span><span><em>고딩</em> 학원 끝나고 22:00</span>
+  </div></div>
+</header>
+
+<main>
+  <div class="herozone band">
+    <canvas id="dust" aria-hidden="true"></canvas>
+    <div class="wrap hero">
+      <div class="vs" aria-hidden="true">
+        <div class="side l">
+          <span class="hp">P1 · 업무량 72%</span>
+          <div class="hpbar"><span></span></div>
+          <span class="who">쌤</span>
+        </div>
+        <div class="vswrap"><span class="vsmark">VS</span></div>
+        <div class="side r">
+          <span class="hp">P2 · 멘탈 64%</span>
+          <div class="hpbar"><span></span></div>
+          <span class="who">고딩</span>
+        </div>
+      </div>
+
+      <div class="title">
+        <span class="tag">교육공동체 신뢰회복 · 1번 주제 소통과 공감</span>
+        <h1><em>역지사지 시뮬레이터</em></h1>
+        <p>상대의 하루를 <b>직접 버텨 보면</b> 왜 그랬는지 알게 된다. 쌤이나 고딩이 되어 AI NPC와 대화하며 하루를 사는 롤플레잉 미연시.</p>
+        <div class="chips">
+          <span class="chip">웹앱 · 설치 없음</span>
+          <span class="chip">15칸 신뢰 게이지</span>
+          <span class="chip">AI NPC 대화</span>
+          <span class="chip">하드웨어 0원</span>
+          <span class="chip">부품비 5만 원 안</span>
+        </div>
+      </div>
+
+      <div class="gauge" id="gauge">
+        <div class="ghead">
+          <span class="tag">신뢰 게이지 · 아래 미니게임과 연결돼요</span>
+          <span class="val" id="gval">7 / 15</span>
+        </div>
+        <div class="leds" id="leds" role="slider" tabindex="0" aria-label="신뢰 게이지" aria-valuemin="0" aria-valuemax="15" aria-valuenow="7"></div>
+        <p class="ghint">LED를 누르거나 옆으로 끌어서 신뢰를 직접 맞출 수 있어요. 키보드는 ← → 키.</p>
+        <div class="gctl">
+          <button class="btn ghost" id="bReset" type="button">처음으로</button>
+        </div>
+        <p class="gmsg" id="gmsg" aria-live="polite">실제 게임에서는 NPC와 대화할 때마다 신뢰 게이지가 이렇게 움직여요.</p>
+      </div>
+    </div>
+  </div>
+
+  <section class="blk band" id="video">
+    <div class="wrap">
+      <span class="tag">15초 소개 영상</span>
+      <h2>먼저 영상으로 보기</h2>
+      <div class="vbox">
+        <video src="intro.mp4" poster="intro-poster.jpg" autoplay muted loop playsinline controls preload="metadata" aria-label="역지사지 시뮬레이터 15초 소개 영상. 쌤 VS 고딩 제목, 쌤의 하루, 고딩의 하루, 15칸 신뢰 게이지가 차오르는 장면, 1번 주제 소개 순서로 나와요."></video>
+      </div>
+    </div>
+  </section>
+
+  <section class="blk band" id="vn">
+    <div class="wrap">
+      <span class="tag">미연시 맛보기</span>
+      <h2>오늘 하루, 누구로 살아 볼래?</h2>
+      <p class="lede">루트를 고르고 NPC와 대화해 보세요. 고른 대답에 따라 위 신뢰 게이지가 움직여요. <b>실제 게임에서는 AI가 NPC를 연기하고, 직접 입력한 말까지 판단해요.</b></p>
+      <div class="vn" id="vnbox">
+        <div class="vnpick" id="vnpick">
+          <button class="route s" type="button" data-route="s"><span class="tag">ROUTE 1</span><b>쌤 루트</b><span>민원 전화, 쉬는 시간 질문, 방과 후</span></button>
+          <button class="route g" type="button" data-route="g"><span class="tag">ROUTE 2</span><b>고딩 루트</b><span>통화 중인 쌤, 기준표, 밤 10시 메시지</span></button>
+        </div>
+        <div class="vnstage" id="vnstage" hidden>
+          <div class="vnscene" id="vnscene">
+            <div class="vnwhere"><span id="vnwhen">08:20</span><b id="vnwhere">교무실</b></div>
+            <div class="vnstep" id="vnstep"></div>
+            <div class="vnchar" id="vnchar" aria-hidden="true">
+              <svg viewBox="0 0 200 240"><circle cx="100" cy="78" r="46" class="hd"/><path d="M28 240c0-62 32-100 72-100s72 38 72 100z" class="bd"/><circle cx="84" cy="80" r="5" class="ey"/><circle cx="116" cy="80" r="5" class="ey"/><path id="vnmouth" d="M86 102q14 10 28 0" class="mo"/></svg>
+            </div>
+          </div>
+          <div class="vnbox">
+            <div class="vnname" id="vnname">학부모</div>
+            <p class="vntext" id="vntext" aria-live="polite"></p>
+            <div class="vnchoices" id="vnchoices"></div>
+            <form class="vnfree" id="vnfree" autocomplete="off">
+              <label class="sr" for="vnin">직접 말하기</label>
+              <input id="vnin" type="text" maxlength="80" placeholder="직접 말해 보기 (데모는 단어로만 판단해요)">
+              <button class="btn ghost" type="submit">말하기</button>
+            </form>
+          </div>
+          <div class="vnend" id="vnend" hidden></div>
+        </div>
+      </div>
+      <p class="small">대사와 선택지는 데모용 예시예요. 실제 게임은 AI가 상황과 플레이어 말에 맞춰 NPC 대사를 새로 만들고, 인터넷이 끊기면 이런 미리 쓴 대본으로 돌아가요.</p>
+    </div>
+  </section>
+
+  <section class="blk band" id="topic">
+    <div class="wrap">
+      <span class="tag">해커톤 주제</span>
+      <h2>1번 주제 · 소통과 공감으로 서로 이해하는 학교</h2>
+      <p class="lede">2026 울산 AI 해커톤 탐구 주제는 <b>교육공동체 신뢰회복</b>이고, 4가지 세부 주제 중 하나를 고른다. 우리는 <b>1번</b>을 골랐다.</p>
+      <div class="topics">
+        <div class="tp on"><span class="no">1</span><div><b>소통과 공감으로 서로 이해하는 학교</b><span>우리 주제</span></div></div>
+        <div class="tp sub"><span class="no">4</span><div><b>참여와 협력으로 함께 만들어 가는 학교</b><span>같이 닿는 주제</span></div></div>
+        <div class="tp"><span class="no">2</span><div><b>공정성과 투명성으로 믿음을 주는 학교</b></div></div>
+        <div class="tp"><span class="no">3</span><div><b>존중과 배려로 함께 안심하는 학교</b></div></div>
+      </div>
+      <div class="tablebox">
+        <table class="cmp map">
+          <thead><tr><th>1번 주제 설명에 있는 말</th><th>역지사지 시뮬레이터에서는</th></tr></thead>
+          <tbody>
+            <tr><td>학생·교직원·학부모는 같은 상황에서도 서로 다른 생각과 감정을 가질 수 있다</td><td>쌤 루트와 고딩 루트로 같은 하루를 각각 살아 본다.</td></tr>
+            <tr><td>표현 방식이 달라 생기는 오해를 줄인다</td><td>NPC에게 어떻게 말하느냐에 따라 신뢰 게이지와 NPC 반응이 바뀐다.</td></tr>
+            <tr><td>서로의 입장을 이해한다</td><td>끝나면 “서로 몰랐던 일 TOP 3”를 보여 주고, 다음 판은 역할을 바꾼다.</td></tr>
+            <tr><td>원활하게 소통할 수 있는 방안</td><td>AI가 엔딩에서 “서로 몰랐던 일”과 다음에 써 볼 말을 알려 준다.</td></tr>
+          </tbody>
+        </table>
+      </div>
+      <p class="small">4번 주제와도 닿아 있어요. 혼자 잘해서는 안 되고 서로 도와야 게이지가 오르는 구조라서요. 다만 제출할 때 고르는 주제는 1번이에요.</p>
+    </div>
+  </section>
+
+  <section class="blk band" id="play">
+    <div class="wrap">
+      <span class="tag">장면 사이 미니게임</span>
+      <h2>바쁜 순간은 손으로 겪기</h2>
+      <p class="lede">대화 장면 사이에 그 사람의 바쁜 순간을 짧은 미니게임으로 겪어요. 결과는 같은 신뢰 게이지에 반영되고, <b>신뢰가 높을수록 쉬워져요.</b></p>
+      <div class="tabs" role="tablist" aria-label="모드 선택">
+        <button class="tab s" role="tab" id="tab-s" aria-controls="panel-s" aria-selected="true" type="button">쌤의 하루</button>
+        <button class="tab g" role="tab" id="tab-g" aria-controls="panel-g" aria-selected="false" type="button">고딩의 하루</button>
+      </div>
+      <div class="diff" id="diff" aria-live="polite"></div>
+      <div class="panel" id="panel-s" role="tabpanel" aria-labelledby="tab-s">
+        <div class="games">
+<div class="game" id="g1">
+          <div class="gtop"><h3>민원 전화 받기</h3><span class="who-tag s">쌤</span></div>
+          <p>학부모 전화가 세 통 와요. 벨이 울리면 전화를 받고, 민원에 맞는 대답을 고르세요.</p>
+          <div class="stage" id="g1stage">
+            <div class="phone" id="g1phone">
+              <svg viewBox="0 0 64 64" aria-hidden="true"><path fill="currentColor" d="M20 6c-3 0-9 4-9 11 0 15 21 41 37 41 7 0 11-6 11-9 0-2-1-3-3-4l-8-5c-2-1-4-1-5 1l-3 4c-6-2-14-11-16-17l4-3c2-1 2-3 1-5l-5-9c-1-2-2-5-4-5z"/></svg>
+              <span class="ptxt" id="g1txt">대기 중</span>
+            </div>
+            <div class="call" id="g1call" hidden>
+              <div class="from"><span id="g1who">학부모 1/3</span><span id="g1ms"></span></div>
+              <div class="bubble" id="g1q"></div>
+            </div>
+          </div>
+          <div class="timer" id="g1tbox" hidden><span id="g1timer"></span></div>
+          <div class="choices" id="g1choices" hidden></div>
+          <p class="why" id="g1why" aria-live="polite"></p>
+          <div class="row">
+            <button class="btn ghost" id="g1start" type="button">전화 3통 시작</button>
+            <button class="btn ssam" id="g1pick" type="button" disabled>전화 받기</button>
+          </div>
+          <div class="pips" id="g1pips" aria-hidden="true"><i></i><i></i><i></i></div>
+          <p class="result" id="g1res" aria-live="polite">최고 기록: –</p>
+        </div>
+<div class="game" id="g2">
+          <div class="gtop"><h3>결재 도장 연타</h3><span class="who-tag s">쌤</span></div>
+          <p>제한 시간 안에 서류에 도장을 최대한 많이 찍으세요. 신뢰가 높으면 시간이 늘어나요.</p>
+          <div class="stage" id="g2stage">
+            <div class="paper" id="g2paper" role="button" tabindex="0" aria-label="서류에 도장 찍기"></div>
+            <span class="count" id="g2count">0</span>
+          </div>
+          <div class="timer"><span id="g2timer"></span></div>
+          <div class="row"><button class="btn ghost" id="g2start" type="button">시작</button></div>
+          <p class="result" id="g2res" aria-live="polite">최고 기록: –</p>
+        </div>
+        </div>
+        <details class="devbox"><summary>쌤 루트 NPC와 하루 예시</summary>
+          <div class="devs">
+          <div class="dev"><h3>학부모 NPC</h3><span class="part">AI 대화 · 전화 장면</span><p>민원을 들고 전화한다. 말투에 따라 누그러지거나 날카로워진다.</p></div>
+          <div class="dev"><h3>학생 NPC</h3><span class="part">AI 대화 · 쉬는 시간</span><p>바쁠 때 질문하러 온다. 어떻게 돌려보내느냐가 중요하다.</p></div>
+          <div class="dev"><h3>결재 도장</h3><span class="part">미니게임</span><p>쌓이는 서류를 쾅쾅 눌러 처리한다.</p></div>
+        </div>
+        <div class="events">
+          <span class="tag">이런 일이 생겨요 (예시)</span>
+          <div class="ev"><time>08:20</time><span>출근하자마자 학부모 민원 전화가 울린다.</span></div>
+          <div class="ev"><time>12:40</time><span>점심시간에 결재 서류 다섯 장이 한꺼번에 들어온다.</span></div>
+          <div class="ev"><time>16:30</time><span>수행평가 마감 직전, 학생 질문이 몰린다.</span></div>
+        </div>
+      
+        </details>
+      </div>
+      <div class="panel" id="panel-g" role="tabpanel" aria-labelledby="tab-g" hidden>
+        <div class="games">
+<div class="game" id="g3">
+          <div class="gtop"><h3>질문 타이밍</h3><span class="who-tag g">고딩</span></div>
+          <p>쌤 불이 초록일 때만 질문하세요. 빨강일 때 가면 신뢰가 깎여요.</p>
+          <div class="stage" id="g3stage">
+            <div class="desk">
+              <div class="lamp" id="g3lamp"></div>
+              <span class="state" id="g3state">시작을 눌러요</span>
+            </div>
+          </div>
+          <div class="row">
+            <button class="btn ghost" id="g3start" type="button">시작 (10초)</button>
+            <button class="btn goo" id="g3ask" type="button" disabled>질문하기</button>
+          </div>
+          <p class="result" id="g3res" aria-live="polite">성공 0 · 실패 0</p>
+        </div>
+<div class="game" id="g4">
+          <div class="gtop"><h3>할 일 카드 러시</h3><span class="who-tag g">고딩</span></div>
+          <p>할 일 카드가 사라지기 전에 눌러서 제출하세요. 보라색 딴짓 카드는 누르면 안 돼요.</p>
+          <div class="stage" id="g4stage">
+            <div class="slots" id="g4slots"><div class="slot"></div><div class="slot"></div><div class="slot"></div><div class="slot"></div><div class="slot"></div><div class="slot"></div></div>
+            <span class="idle" id="g4idle">시작을 눌러요</span>
+          </div>
+          <div class="timer"><span id="g4timer"></span></div>
+          <div class="row"><button class="btn ghost" id="g4start" type="button">시작 (15초)</button></div>
+          <p class="result" id="g4res" aria-live="polite">제출 0 · 놓침 0 · 딴짓 0</p>
+        </div>
+        </div>
+        <details class="devbox"><summary>고딩 루트 NPC와 하루 예시</summary>
+          <div class="devs">
+          <div class="dev"><h3>쌤 NPC</h3><span class="part">AI 대화 · 교무실</span><p>통화 중이거나 서류에 묻혀 있다. 타이밍과 말투가 중요하다.</p></div>
+          <div class="dev"><h3>친구 NPC</h3><span class="part">AI 대화 · 교실</span><p>같이 기준표를 몰라 헤맨다. 같이 물어볼지 정한다.</p></div>
+          <div class="dev"><h3>할 일 카드</h3><span class="part">미니게임</span><p>마감 전에 과제 카드를 제출한다.</p></div>
+        </div>
+        <div class="events">
+          <span class="tag">이런 일이 생겨요 (예시)</span>
+          <div class="ev"><time>09:00</time><span>1교시부터 수행평가 공지가 세 개 뜬다.</span></div>
+          <div class="ev"><time>13:10</time><span>질문하러 갔더니 쌤이 통화 중이다.</span></div>
+          <div class="ev"><time>22:00</time><span>학원 끝나고 과제 카드를 내야 한다.</span></div>
+        </div>
+      
+        </details>
+      </div>
+      <p class="small">민원 내용과 대답, 하루 예시는 게임용으로 만든 예시예요. 실제 게임에서는 AI가 상황에 맞게 새로 만들어요. 실제 게임에서는 대화 장면 사이에 이 미니게임이 짧게 들어가요.</p>
+    </div>
+  </section>
+
+  <section class="blk band" id="problem">
+    <div class="wrap">
+      <span class="tag">문제</span>
+      <h2>같은 장면, 다른 하루</h2>
+      <p class="lede">서로 하루에 무슨 일을 하는지 모르니까 오해가 쌓인다. <b>말로 설명을 듣는 것보다 그 사람이 되어 대화해 보는 쪽이 빠르다.</b></p>
+      <div class="split">
+        <div class="quote g"><span class="tag">고딩이 보는 쌤</span><p>“질문하러 가면 맨날 바쁘다고 하시고 폰만 보셔.”</p></div>
+        <div class="quote s"><span class="tag">쌤이 보는 고딩</span><p>“수업 시간엔 조용하다가 마감 직전에만 몰려와.”</p></div>
+      </div>
+      <div class="gaps">
+        <div class="gap"><span class="no">01</span><h3>보이는 건 일부뿐</h3><p>학생은 교실 밖 쌤의 일을 못 보고, 쌤은 학원과 과제가 겹친 밤을 못 본다.</p></div>
+        <div class="gap"><span class="no">02</span><h3>타이밍이 엇갈림</h3><p>학생이 물어볼 수 있는 쉬는 시간이 쌤에게는 전화와 서류를 처리하는 시간이다.</p></div>
+        <div class="gap"><span class="no">03</span><h3>같은 말, 다른 뜻</h3><p>“지금 바빠”는 쌤에게는 사정 설명이고, 학생에게는 “오지 마”로 들린다.</p></div>
+      </div>
+      <div class="answer">
+        <span class="tag">그래서 이렇게 푼다</span>
+        <ul>
+          <li><b>설명 대신 체험</b> · 상대가 되어 하루를 직접 산다.</li>
+          <li><b>정답 대신 대화</b> · AI NPC와 말을 주고받으며 어떤 말이 어떻게 들리는지 겪는다.</li>
+          <li><b>점수 대신 신뢰</b> · 상대 입장을 헤아린 말일수록 신뢰 게이지가 오른다.</li>
+        </ul>
+      </div>
+      <p class="small">두 인용문과 세 가지 엇갈림은 설명을 위한 예시예요. 실제 발표에는 교내 설문 결과를 넣을 예정이에요.</p>
+    </div>
+  </section>
+
+  <section class="blk band" id="how">
+    <div class="wrap">
+      <span class="tag">게임 진행</span>
+      <h2>한 판은 이렇게 흘러간다</h2>
+      <p class="lede">루트를 고르면 <b>아침, 쉬는 시간, 점심, 방과 후</b> 장면을 NPC와 대화하며 지나간다. 한 판은 3~5분을 목표로 한다.</p>
+      <ol class="flow">
+        <li><span class="no">1</span><div><h3>루트 고르기</h3><p>쌤 루트나 고딩 루트를 고른다. 평소 내 자리와 반대 루트를 고르면 더 재밌다.</p></div></li>
+        <li><span class="no">2</span><div><h3>장면마다 NPC와 대화</h3><p>학부모, 학생, 쌤 NPC가 말을 건다. 선택지를 고르거나, 직접 입력하거나, 옵션으로 말해서 대답한다.</p></div></li>
+        <li><span class="no">3</span><div><h3>AI가 대답을 읽는다</h3><p>내 말이 상대 입장을 얼마나 헤아렸는지 AI가 판단해서 신뢰 게이지를 올리거나 내린다. NPC 반응도 그에 맞게 바뀐다.</p></div></li>
+        <li><span class="no">4</span><div><h3>장면 사이 미니게임</h3><p>민원 전화 받기, 결재 도장 연타, 질문 타이밍처럼 그 사람의 바쁜 순간을 짧게 겪는다. 신뢰가 높을수록 쉬워진다.</p></div></li>
+        <li><span class="no">5</span><div><h3>엔딩과 반대 루트</h3><p>게이지에 따라 엔딩이 갈리고, AI가 “서로 몰랐던 일 TOP 3”를 정리한다. 다음 판은 반대 루트로 같은 하루를 본다.</p></div></li>
+      </ol>
+    </div>
+  </section>
+
+  <section class="blk band" id="modes">
+    <div class="wrap">
+      <span class="tag">두 루트</span>
+      <h2>같은 하루, 다른 주인공</h2>
+      <div class="tablebox">
+        <table class="cmp">
+          <thead><tr><th></th><th class="s">쌤 루트</th><th class="g">고딩 루트</th></tr></thead>
+          <tbody>
+            <tr><th>만나는 NPC</th><td>학부모, 학생, 동료 쌤</td><td>쌤, 친구, 학부모(집)</td></tr>
+            <tr><th>장면 예시</th><td>아침 민원 전화, 쉬는 시간 질문, 방과 후 상담</td><td>통화 중인 쌤, 기준표 질문, 밤 10시 과제</td></tr>
+            <tr><th>미니게임</th><td>민원 전화 받기, 결재 도장 연타</td><td>질문 타이밍, 할 일 카드 러시</td></tr>
+            <tr><th>신뢰가 오를 때</th><td>걱정을 먼저 받아 주고 할 일을 말한다<br>바빠도 시간을 약속한다</td><td>상황을 보고 타이밍을 맞춘다<br>모르는 걸 콕 집어 묻는다</td></tr>
+            <tr><th>신뢰가 내려갈 때</th><td>탓하거나 말을 자른다</td><td>무작정 조르거나 그냥 피한다</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </section>
+
+  <section class="blk band" id="rules">
+    <div class="wrap">
+      <span class="tag">신뢰 게이지</span>
+      <h2>미연시의 호감도 = 신뢰 15칸</h2>
+      <p class="lede">미연시에서 호감도가 쌓이듯, 대화할 때마다 신뢰가 오르내린다. <b>칸 수에 따라 미니게임 난이도와 엔딩이 달라진다.</b></p>
+      <div class="zones">
+        <div class="zone low"><div class="zbar"><i></i><i></i><i></i><i></i><i></i></div><b>0~4칸 · 빨강</b><span>난이도 어려움 · NPC가 날카로워진다</span><em>엔딩: 오해가 쌓인 하루</em></div>
+        <div class="zone mid"><div class="zbar"><i></i><i></i><i></i><i></i><i></i></div><b>5~9칸 · 주황</b><span>난이도 보통</span><em>엔딩: 아직은 평행선</em></div>
+        <div class="zone high"><div class="zbar"><i></i><i></i><i></i><i></i><i></i></div><b>10~15칸 · 초록</b><span>난이도 쉬움 · NPC가 먼저 사정을 말해 준다</span><em>엔딩: 역지사지 성공</em></div>
+      </div>
+      <p class="small">맨 위 게이지, 미연시 맛보기, 미니게임이 모두 같은 게이지를 써요. 엔딩 이름은 아직 정하는 중이에요.</p>
+    </div>
+  </section>
+
+  <section class="blk band" id="ai">
+    <div class="wrap">
+      <span class="tag">AI의 역할</span>
+      <h2>AI가 NPC가 된다</h2>
+      <div class="aijobs">
+        <div class="job"><span class="no">01</span><h3>NPC 연기</h3><p>장면, 성격, 지금 신뢰를 받아서 학부모·학생·쌤의 대사를 그때그때 만든다.</p><div class="io"><span>예</span>신뢰 3칸 학부모: “공지를 했다는데 왜 저희 애만 몰랐을까요?”</div></div>
+        <div class="job"><span class="no">02</span><h3>대답 판단</h3><p>플레이어가 직접 쓴 말을 읽고, 상대 입장을 헤아렸는지 판단해서 신뢰 변화(−2~+3)와 이유를 정한다.</p><div class="io"><span>예</span>“걱정되셨겠어요” → +2 · 감정을 먼저 받아 줌</div></div>
+        <div class="job"><span class="no">03</span><h3>엔딩 분석</h3><p>한 판의 대화 기록을 읽고 “서로 몰랐던 일 TOP 3”와 다음에 써 볼 말을 정리한다.</p><div class="io"><span>예</span>“바빠”라고 할 때 언제 볼 수 있는지도 같이 말해 보세요.</div></div>
+      </div>
+      <div class="ai">
+        <div class="aibox on"><span class="sw">AI ON</span><h3>판마다 다른 대화</h3><p>NPC가 플레이어 말에 맞춰 반응한다. 같은 루트를 해도 매번 대화가 달라진다.</p></div>
+        <div class="aibox off"><span class="sw">AI OFF</span><h3>인터넷이 끊겨도 시연 가능</h3><p>미리 써 둔 대본과 선택지로 진행한다. AI 답이 늦거나 막히면 이쪽으로 바로 넘어간다.</p></div>
+      </div>
+      <div class="safe">
+        <span class="tag">안전하고 돈 안 새게 쓰는 규칙</span>
+        <ul>
+          <li><b>실명과 개인정보는 넣지 않는다.</b> NPC는 모두 가상 인물이고, 플레이어 이름도 받지 않는다.</li>
+          <li><b>API 키는 노트북 서버에만 둔다.</b> 웹페이지와 GitHub에는 절대 올리지 않는다.</li>
+          <li><b>호출 수와 글자 수에 상한을 둔다.</b> 한 판 호출 횟수, 입력 80자 제한, 서비스 쪽 월 지출 한도를 낮게 설정한다.</li>
+          <li><b>AI 문장은 띄우기 전에 거른다.</b> 길이와 금지어를 확인하고, 이상하면 미리 써 둔 대사로 바꾼다.</li>
+        </ul>
+      </div>
+    </div>
+  </section>
+
+  <section class="blk band" id="voice">
+    <div class="wrap">
+      <span class="tag">음성 · 옵션</span>
+      <h2>말로 대답해 보기</h2>
+      <div class="ai">
+        <div class="aibox on"><span class="sw">기본</span><h3>선택지 + 직접 입력</h3><p>시끄러운 행사장에서도 확실하게 돌아간다. 패드 화면 키보드로 짧게 입력한다.</p></div>
+        <div class="aibox off"><span class="sw">옵션</span><h3>누르고 말하기</h3><p>버튼을 누르는 동안만 브라우저 음성 인식으로 듣는다. NPC 대사는 브라우저 읽기 기능으로 소리 낸다. 둘 다 별도 요금 없이 쓸 수 있는 기능이다.</p></div>
+      </div>
+      <p class="small">브라우저 음성 인식은 기기와 브라우저마다 지원이 달라요. 크롬에서 먼저 시험하고, 패드에서 한국어가 잘 되는지는 대회 전에 직접 확인해야 해요. 안 되면 입력으로 진행해요.</p>
+    </div>
+  </section>
+
+  <section class="blk band" id="arch">
+    <div class="wrap">
+      <span class="tag">시스템 구조</span>
+      <h2>말 한마디가 NPC 대답이 되기까지</h2>
+      <div class="arch">
+        <div class="node"><b>패드 · 노트북</b><span>브라우저 웹앱 · 설치 없음</span></div>
+        <div class="wire">Wi-Fi</div>
+        <div class="node"><b>노트북 서버</b><span>장면 진행, 신뢰 계산, 기록, 키 보관</span></div>
+        <div class="wire">요청</div>
+        <div class="node opt"><b>LLM API</b><span>NPC 대사, 대답 판단, 엔딩</span></div>
+        <div class="wire">대비</div>
+        <div class="node"><b>대본 파일</b><span>AI OFF 때 쓰는 대사와 선택지</span></div>
+      </div>
+      <div class="trace">
+        <span class="tag">예: 학부모에게 “걱정되셨겠어요”라고 입력하면</span>
+        <ol>
+          <li><b>웹앱</b> 입력한 말을 서버로 보낸다. 80자를 넘으면 자른다.</li>
+          <li><b>서버</b> 장면 정보, NPC 성격, 지금 신뢰, 최근 대화 몇 줄을 묶어 AI에 보낸다.</li>
+          <li><b>AI</b> NPC 대답 한 줄, 신뢰 변화 +2, 이유 한 줄을 정해진 형식으로 돌려준다.</li>
+          <li><b>서버</b> 형식과 금지어를 확인하고, 이상하거나 5초 넘게 늦으면 대본 대사로 바꾼다.</li>
+          <li><b>화면</b> NPC 표정과 대사가 바뀌고 신뢰 게이지가 한 칸 오른다.</li>
+        </ol>
+      </div>
+    </div>
+  </section>
+
+  <section class="blk band" id="parts">
+    <div class="wrap">
+      <a class="cta" href="build.html">
+        <span class="tag">화면 구성 · NPC 대본 · 준비물</span>
+        <b>만들 때 보는 설계도는 따로 모아 뒀어요</b>
+        <span class="sub">미연시 화면 구성 · 장면 대본 형식 · AI에 보낼 지시문 · 준비물 체크리스트</span>
+        <span class="go" aria-hidden="true">→</span>
+      </a>
+    </div>
+  </section>
+
+  <section class="blk band" id="demo">
+    <div class="wrap">
+      <span class="tag">현장 시연</span>
+      <h2>부스에서 2분이면 충분</h2>
+      <div class="steps">
+        <div class="step"><span class="no">1</span><h3>20초 · 루트 고르기</h3><p>심사위원에게 평소 자리와 반대 루트를 권한다. 쌤이면 고딩 루트, 학생이면 쌤 루트.</p></div>
+        <div class="step"><span class="no">2</span><h3>70초 · 대화하기</h3><p>한 장면은 선택지로, 한 장면은 직접 입력으로 대답한다. AI NPC가 그 말에 반응하는 걸 보여 준다.</p></div>
+        <div class="step"><span class="no">3</span><h3>30초 · 엔딩</h3><p>“서로 몰랐던 일 TOP 3”를 보고, 같은 하루를 반대 루트로 하면 어떻게 될지 이야기한다.</p></div>
+      </div>
+      <p class="small">패드가 두 대면 두 명이 각자 다른 루트를 동시에 해요. 노트북 한 대로도 시연할 수 있어요.</p>
+    </div>
+  </section>
+
+  <section class="blk band" id="scope">
+    <div class="wrap">
+      <span class="tag">1박 2일 범위</span>
+      <h2>이것만은 무조건 돌아가게</h2>
+      <div class="scope">
+        <div class="box must"><h3>꼭 만든다</h3><ul>
+          <li><b>미연시 화면</b> (배경, 캐릭터, 대사창, 선택지)</li>
+          <li><b>쌤 루트, 고딩 루트</b> 각 3~4장면</li>
+          <li><b>15칸 신뢰 게이지</b>와 엔딩 3종</li>
+          <li><b>AI 끔 모드</b> (대본 파일로 끝까지 진행)</li>
+          <li><b>AI 켬 모드</b> (NPC 대사, 직접 입력 판단)</li>
+        </ul></div>
+        <div class="box"><h3>시간 되면 붙인다</h3><ul>
+          <li>장면 사이 미니게임</li>
+          <li>AI 엔딩 분석 (TOP 3)</li>
+          <li>음성으로 말하기, NPC 목소리</li>
+          <li>학부모 루트</li>
+        </ul></div>
+      </div>
+      <ol class="plan">
+        <li><b>1일차 낮</b><span>대본 파일 형식, 미연시 화면, AI 끔 모드</span></li>
+        <li><b>1일차 저녁</b><span>서버와 AI 연결, 대답 판단</span></li>
+        <li><b>1일차 밤</b><span>대사 다듬기, 미니게임이나 음성</span></li>
+        <li><b>2일차 오전</b><span>슬라이드, 시연 리허설</span></li>
+      </ol>
+      <p class="small">진행 순서는 계획(안)이에요. 대회 시간표가 나오면 맞춰서 바꿔요.</p>
+    </div>
+  </section>
+
+  <section class="blk band" id="team">
+    <div class="wrap">
+      <span class="tag">역할 분담</span>
+      <h2>세 명, 세 자리</h2>
+      <div class="roles">
+        <div class="role"><h3>개발</h3><p>웹앱과 서버, AI 연결, 신뢰 계산, AI 끔 모드</p></div>
+        <div class="role"><h3>디자인</h3><p>배경과 캐릭터 그림, 대사창과 엔딩 화면, 슬라이드</p></div>
+        <div class="role"><h3>시나리오 · 발표</h3><p>장면 대본과 NPC 성격, 교내 설문, 발표 대본</p></div>
+      </div>
+    </div>
+  </section>
+
+  <section class="blk band" id="effect">
+    <div class="wrap">
+      <span class="tag">기대 효과</span>
+      <h2>한 판 하고 나면</h2>
+      <ul class="effects">
+        <li>상대가 되어 하루를 살아 보며 그 사람의 사정을 몸으로 이해한다.</li>
+        <li>같은 말이 상대에게 어떻게 들리는지 NPC 반응으로 바로 확인한다.</li>
+        <li>엔딩의 “서로 몰랐던 일”과 “다음에 써 볼 말”이 실제 대화를 시작할 거리가 된다.</li>
+        <li>웹앱이라 링크 하나로 학교 축제, 학부모 총회, 수업 시간에 바로 쓸 수 있다.</li>
+        <li>대본 파일만 추가하면 학부모 루트, 교직원 루트 같은 새 이야기를 붙일 수 있다.</li>
+      </ul>
+    </div>
+  </section>
+</main>
+
+<footer class="band">
+  <div class="wrap">
+    <span>TEAM 418 · 신정고 매니악코더</span>
+    <span>2026 울산 AI 해커톤 · 울산전시컨벤션센터</span>
+  </div>
+</footer>
+
+<div class="minig hide" id="minig" aria-hidden="true"><span>신뢰</span><span class="dots" id="minidots"></span><span id="minival">7</span></div>
+
+<script>
+(function(){
+  var reduce=window.matchMedia&&matchMedia('(prefers-reduced-motion: reduce)').matches;
+  function $(id){return document.getElementById(id);}
+  function store(k,v){try{if(v===undefined)return localStorage.getItem(k);localStorage.setItem(k,v);}catch(e){return null;}}
+  function shuffle(a){a=a.slice();for(var i=a.length-1;i>0;i--){var j=Math.floor(Math.random()*(i+1)),t=a[i];a[i]=a[j];a[j]=t;}return a;}
+  function center(el){var r=el.getBoundingClientRect();return {x:r.left+r.width/2,y:r.top+r.height/2};}
+
+  /* ===== 효과: 불꽃, 떠오르는 글자, 배너, 꽃가루 ===== */
+  var COLS=['#f4c64e','#5fc8f0','#5fd68a','#ef5b4c','#eef3ea'];
+  function burst(x,y,n,cols){
+    if(reduce)return;cols=cols||COLS;n=n||14;
+    for(var i=0;i<n;i++){var s=document.createElement('span');s.className='spark';
+      var a=Math.random()*Math.PI*2,d=40+Math.random()*70;
+      s.style.left=x+'px';s.style.top=y+'px';s.style.background=cols[i%cols.length];
+      s.style.setProperty('--dx',Math.cos(a)*d+'px');s.style.setProperty('--dy',Math.sin(a)*d+'px');s.style.setProperty('--rot',(Math.random()*540)+'deg');
+      document.body.appendChild(s);setTimeout(s.remove.bind(s),700);}
+  }
+  function fx(x,y,txt,color){
+    if(reduce)return;var t=document.createElement('span');t.className='fx';t.textContent=txt;t.style.left=x+'px';t.style.top=y+'px';t.style.color=color||'var(--chalk)';
+    document.body.appendChild(t);setTimeout(t.remove.bind(t),950);
+  }
+  function banner(txt,bad){
+    if(reduce)return;var b=document.createElement('div');b.className='banner'+(bad?' bad':'');b.textContent=txt;document.body.appendChild(b);setTimeout(b.remove.bind(b),1700);
+  }
+  function confetti(){
+    if(reduce)return;
+    for(var i=0;i<60;i++){var c=document.createElement('span');c.className='confetti';
+      c.style.left=Math.random()*100+'vw';c.style.background=COLS[i%5];c.style.animationDelay=(Math.random()*.5)+'s';c.style.animationDuration=(1.2+Math.random()*1)+'s';
+      document.body.appendChild(c);setTimeout(c.remove.bind(c),2800);}
+  }
+  document.addEventListener('pointerdown',function(e){
+    var b=e.target.closest&&e.target.closest('.btn,.tab');
+    if(b&&!b.disabled)burst(e.clientX,e.clientY,10);
+  });
+
+  /* ===== 분필 가루 ===== */
+  (function(){
+    var cv=$('dust');if(!cv||reduce||!cv.getContext)return;
+    var ctx=cv.getContext('2d'),W=0,H=0,ps=[],dpr=Math.min(window.devicePixelRatio||1,2);
+    function size(){var r=cv.getBoundingClientRect();W=r.width;H=r.height;cv.width=W*dpr;cv.height=H*dpr;ctx.setTransform(dpr,0,0,dpr,0,0);}
+    size();window.addEventListener('resize',size);
+    for(var i=0;i<46;i++)ps.push({x:Math.random(),y:Math.random(),r:.6+Math.random()*1.8,v:.0004+Math.random()*.0012,c:i%3===0?'244,198,78':(i%3===1?'95,200,240':'238,243,234'),a:.15+Math.random()*.35});
+    function step(){
+      ctx.clearRect(0,0,W,H);
+      for(var i=0;i<ps.length;i++){var p=ps[i];p.y-=p.v;p.x+=Math.sin((p.y+i)*6)*.0004;if(p.y<-.02){p.y=1.02;p.x=Math.random();}
+        ctx.beginPath();ctx.fillStyle='rgba('+p.c+','+p.a+')';ctx.arc(p.x*W,p.y*H,p.r,0,7);ctx.fill();}
+      requestAnimationFrame(step);
+    }
+    step();
+  })();
+
+  /* ===== 제목 밑줄 ===== */
+  if('IntersectionObserver' in window&&!reduce){
+    var hs=document.querySelectorAll('section h2');
+    var io=new IntersectionObserver(function(es){es.forEach(function(e){if(e.isIntersecting){e.target.classList.remove('pre');e.target.classList.add('in');io.unobserve(e.target);}});},{threshold:.6});
+    hs.forEach(function(h){var r=h.getBoundingClientRect();if(r.top>window.innerHeight){h.classList.add('pre');io.observe(h);}});
+  }
+
+  /* ===== 신뢰 게이지 ===== */
+  var N=15,v=7,leds=$('leds'),gauge=$('gauge'),minidots=$('minidots');
+  for(var i=0;i<N;i++){var d=document.createElement('span');d.className='led';leds.appendChild(d);minidots.appendChild(document.createElement('i'));}
+  var cells=leds.children,mcells=minidots.children;
+  function lvl(n){return n<=4?'low':(n<=9?'mid':'high');}
+  function draw(){var c=lvl(v);for(var i=0;i<N;i++){var on=i<v;cells[i].className='led'+(on?' on '+c:'');mcells[i].className=on?'on '+c:'';}$('gval').textContent=v+' / '+N;$('minival').textContent=v;leds.setAttribute('aria-valuenow',v);updDiff();}
+  /* 신뢰 → 난이도 (낮음 0~4 / 보통 5~9 /높음 10~15) */
+  var DIFF={name:['어려움','보통','쉬움'],ans:[6,10,15],stamp:[4,5,6],free:[.3,.45,.6],life:[.75,1,1.3]};
+  function level(){return v<=4?0:(v<=9?1:2);}
+  function updDiff(){
+    var el=$('diff');if(!el)return;var L=level();
+    el.innerHTML='<span>지금 신뢰 '+v+'/15</span><b class="lv'+L+'">'+DIFF.name[L]+'</b><span>민원 답변 '+DIFF.ans[L]+'초 · 도장 '+DIFF.stamp[L]+'초 · 쌤 여유 '+Math.round(DIFF.free[L]*100)+'% · 카드 유지 '+(L===0?'짧게':(L===1?'보통':'길게'))+'</span>';
+  }
+  /* LED를 누르거나 끌어서 직접 조절 */
+  (function(){
+    var drag=false;
+    function setFrom(e){
+      var r=leds.getBoundingClientRect(),x=Math.max(0,Math.min(r.width-1,e.clientX-r.left));
+      var n=Math.floor(x/r.width*N)+1;
+      if(n===1&&v===1&&e.type==='pointerdown')n=0;
+      if(n!==v){var up=n>v,b=v;v=n;draw();if(up)wave(b,v);say('신뢰를 <b>'+v+'</b>칸으로 맞췄어요. 난이도는 <b>'+DIFF.name[level()]+'</b>.');}
+    }
+    leds.addEventListener('pointerdown',function(e){drag=true;try{leds.setPointerCapture(e.pointerId);}catch(_){}setFrom(e);});
+    leds.addEventListener('pointermove',function(e){if(drag)setFrom(e);});
+    leds.addEventListener('pointerup',function(){drag=false;});
+    leds.addEventListener('pointercancel',function(){drag=false;});
+    leds.addEventListener('keydown',function(e){
+      var d=(e.key==='ArrowRight'||e.key==='ArrowUp')?1:((e.key==='ArrowLeft'||e.key==='ArrowDown')?-1:0);
+      if(e.key==='Home'){v=0;draw();e.preventDefault();return;}if(e.key==='End'){v=N;draw();e.preventDefault();return;}
+      if(d){e.preventDefault();v=Math.max(0,Math.min(N,v+d));draw();say('신뢰를 <b>'+v+'</b>칸으로 맞췄어요. 난이도는 <b>'+DIFF.name[level()]+'</b>.');}
+    });
+  })();
+  function say(t){$('gmsg').innerHTML=t;}
+  function flash(cls){gauge.classList.remove('bump','hurt');void gauge.offsetWidth;gauge.classList.add(cls);}
+  function wave(from,to){if(reduce)return;for(var i=from;i<to;i++){(function(el,k){setTimeout(function(){el.classList.remove('wave');void el.offsetWidth;el.classList.add('wave');},k*40);})(cells[i],i-from);}}
+  function trust(delta,why,at){
+    var before=v;v=Math.max(0,Math.min(N,v+delta));draw();
+    if(delta>0){flash('bump');wave(before,v);}else if(delta<0){flash('hurt');}
+    if(at&&delta!==0)fx(at.x,at.y,(delta>0?'신뢰 +':'신뢰 −')+Math.abs(delta),delta>0?'var(--high)':'var(--low)');
+    if(v===N&&before<N){say('<b>신뢰 MAX!</b> 서로의 하루를 이해했어요.');banner('신뢰 MAX');confetti();}
+    else if(v===0&&before>0){say('<b>신뢰 바닥.</b> 자리를 바꿔서 다시 해 볼까요?');banner('신뢰 바닥',true);}
+    else if(why){say(why);}
+  }
+  window.__trust=trust;
+  $('bReset').onclick=function(){v=7;draw();say('실제 게임에서는 NPC와 대화할 때마다 신뢰 게이지가 이렇게 움직여요.');};
+  if(reduce){draw();}else{var k=0,t=setInterval(function(){k++;var c=lvl(k);for(var i=0;i<N;i++){cells[i].className='led'+(i<k?' on '+c:'');}if(k>=N){clearInterval(t);setTimeout(draw,250);}},55);}
+  /* 게이지가 화면 밖이면 오른쪽 아래에 작은 게이지 표시 */
+  if('IntersectionObserver' in window){
+    new IntersectionObserver(function(es){var vis=es[0].isIntersecting;$('minig').classList.toggle('hide',vis);},{threshold:0}).observe(gauge);
+  }
+
+  /* ===== 게임 1: 민원 전화 받기 ===== */
+  var CALLS=[
+    {q:'우리 애 수행평가 점수가 왜 이렇게 낮아요? 납득이 안 돼요.',a:[
+      {t:'채점 기준표를 보내 드리고, 아이와 같이 확인하는 시간을 잡을게요.',s:1,w:'기준을 투명하게 보여 주고 대화 자리를 만들었어요.'},
+      {t:'점수는 이미 확정이라 바꿀 수 없어요.',s:-1,w:'사실이어도 설명 없이 닫아 버리면 불신만 커져요.'},
+      {t:'알겠습니다, 점수를 조금 올려 드릴게요.',s:0,w:'민원은 끝나도 다른 학생과의 공정성이 무너져요.'}]},
+    {q:'애가 반에서 따돌림을 당하는 것 같아요. 학교는 뭐 하세요?',a:[
+      {t:'말씀 감사합니다. 오늘 아이와 따로 이야기하고 상황을 확인한 뒤 다시 연락드릴게요.',s:1,w:'걱정을 받아 주고, 확인 절차와 다음 연락을 약속했어요.'},
+      {t:'애들끼리 장난이었을 거예요.',s:-1,w:'확인도 전에 축소하면 학부모는 학교를 믿지 못해요.'},
+      {t:'관련된 학생 이름을 알려 드릴게요.',s:0,w:'다른 학생의 개인정보라서 함부로 알려 주면 안 돼요.'}]},
+    {q:'숙제가 너무 많아서 애가 새벽까지 못 자요.',a:[
+      {t:'과목 선생님들과 과제 일정이 겹치는지 확인해 볼게요.',s:1,w:'원인을 같이 찾아보는 대답이에요.'},
+      {t:'고등학생이면 그 정도는 해야죠.',s:-1,w:'아이의 상황을 듣지 않고 잘라 버렸어요.'},
+      {t:'그럼 숙제는 안 해도 된다고 할게요.',s:0,w:'혼자 정할 수 없는 약속이라 나중에 더 꼬여요.'}]},
+    {q:'밤 11시인데요, 지금 잠깐 통화 가능하세요?',a:[
+      {t:'급한 일이 아니면 내일 오전에 학교로 연락 주세요. 그때 자세히 들을게요.',s:1,w:'선생님도 쉬어야 해요. 정중하게 시간을 정했어요.'},
+      {t:'(받지 않고 끊는다)',s:-1,w:'아무 말 없이 끊으면 오해가 더 쌓여요.'},
+      {t:'네… (졸린 목소리로 한 시간 통화)',s:0,w:'친절하지만 이러다 다음 날 수업이 무너져요.'}]},
+    {q:'급식에 우리 애 알레르기 음식이 나왔대요!',a:[
+      {t:'영양 선생님께 바로 전달하고 대체 식단을 확인해서 알려 드릴게요.',s:1,w:'안전 문제라 담당자에게 바로 연결했어요.'},
+      {t:'급식은 제 담당이 아니라서요.',s:-1,w:'담당이 아니어도 연결은 해 줘야 해요.'},
+      {t:'앞으로 급식은 먹지 말라고 하세요.',s:0,w:'문제는 그대로 두고 아이만 불편해져요.'}]},
+    {q:'왜 우리 애만 혼내셨어요?',a:[
+      {t:'그때 상황을 설명드릴게요. 아이 이야기도 같이 들어 볼게요.',s:1,w:'사실을 설명하고 아이 쪽 이야기도 듣겠다고 했어요.'},
+      {t:'아이가 잘못했으니까요.',s:-1,w:'맞는 말이어도 설명이 없으면 싸움이 돼요.'},
+      {t:'죄송합니다. 다시는 안 혼낼게요.',s:0,w:'지킬 수 없는 약속은 다음 민원을 부르게 돼요.'}]},
+    {q:'체험학습 신청서 마감이 지났는데, 받아 주시면 안 돼요?',a:[
+      {t:'규정상 가능한지 행정실에 확인하고 오늘 안에 알려 드릴게요.',s:1,w:'규정을 지키면서 확인과 답할 시간을 약속했어요.'},
+      {t:'마감 지났어요.',s:-1,w:'짧고 차가운 대답은 같은 말이어도 상처가 돼요.'},
+      {t:'몰래 받아 드릴게요.',s:0,w:'다른 학생에게 불공평하고 나중에 문제가 돼요.'}]},
+    {q:'학교에서 휴대폰 걷는 거, 너무 심한 거 아니에요?',a:[
+      {t:'규칙을 정한 이유를 설명드리고, 의견은 학교 운영위원회에 전달할게요.',s:1,w:'규칙을 설명하고 의견을 낼 통로도 알려 줬어요.'},
+      {t:'규칙이니까 따르세요.',s:-1,w:'이유를 모르면 규칙은 억지로 느껴져요.'},
+      {t:'그럼 우리 반만 빼 드릴게요.',s:0,w:'혼자 바꿀 수 없는 규칙이에요.'}]}
+  ];
+  var g1={raf:0,st:'idle',list:[],i:0,score:0,rts:[],t0:0,timer:null,best:parseInt(store('g1best2')||'',10)||null};
+  var g1stage=$('g1stage');
+  function g1bestTxt(){return g1.best!==null&&!isNaN(g1.best)?'최고 기록: 3통 중 '+g1.best+'통 정답':'최고 기록: –';}
+  $('g1res').textContent=g1bestTxt();
+  function g1pips(){var ps=$('g1pips').children;for(var i=0;i<3;i++){ps[i].className=g1.marks&&g1.marks[i]||'';}}
+  function g1wait(){
+    g1.st='wait';$('g1call').hidden=true;$('g1phone').hidden=false;$('g1choices').hidden=true;
+    g1stage.classList.remove('ring');$('g1txt').textContent='전화 '+(g1.i+1)+'/3 기다리는 중…';
+    $('g1pick').disabled=false;$('g1pick').classList.remove('pulse');
+    clearTimeout(g1.timer);
+    g1.timer=setTimeout(function(){g1.st='ring';g1.t0=performance.now();g1stage.classList.add('ring');$('g1txt').textContent='따르릉!';$('g1pick').classList.add('pulse');},900+Math.random()*2000);
+  }
+  $('g1start').onclick=function(){
+    g1.list=shuffle(CALLS).slice(0,3);g1.i=0;g1.score=0;g1.rts=[];g1.marks=[];g1pips();
+    $('g1start').disabled=true;$('g1why').textContent='';$('g1res').textContent='벨이 울릴 때까지 기다리세요.';g1wait();
+  };
+  $('g1pick').onclick=function(e){
+    if(g1.st==='wait'){clearTimeout(g1.timer);$('g1why').innerHTML='<span class="bad">벨 울리기 전에 들었어요.</span> 부정출발이라 신뢰 −1';
+      trust(-1,null,{x:e.clientX||center(this).x,y:e.clientY||center(this).y});g1wait();return;}
+    if(g1.st!=='ring')return;
+    var ms=Math.round(performance.now()-g1.t0);g1.rts.push(ms);g1.st='talk';
+    g1stage.classList.remove('ring');$('g1pick').disabled=true;$('g1pick').classList.remove('pulse');
+    var c=g1.list[g1.i];
+    $('g1phone').hidden=true;$('g1call').hidden=false;
+    $('g1who').textContent='학부모 '+(g1.i+1)+'/3';$('g1ms').textContent='응답 '+ms+'ms';
+    var q=$('g1q');q.textContent=c.q;q.style.animation='none';void q.offsetWidth;q.style.animation='';
+    var box=$('g1choices');box.innerHTML='';box.hidden=false;$('g1why').textContent='';
+    shuffle(c.a).forEach(function(opt){
+      var b=document.createElement('button');b.type='button';b.className='choice';b.textContent=opt.t;
+      b.onclick=function(ev){g1answer(opt,b,ev);};box.appendChild(b);
+    });
+    /* 답변 제한 시간: 신뢰가 높을수록 길어짐 */
+    var lim=DIFF.ans[level()]*1000,t0=performance.now(),bar=$('g1timer');$('g1tbox').hidden=false;
+    cancelAnimationFrame(g1.raf);
+    (function tick(){
+      if(g1.st!=='talk')return;
+      var left=Math.max(0,lim-(performance.now()-t0));bar.style.transform='scaleX('+(left/lim)+')';
+      bar.style.background=left<lim*.3?'var(--low)':'var(--ssam)';
+      if(left<=0){g1answer({s:-1,w:'대답을 못 해서 학부모가 더 화났어요.'},null,null);return;}
+      g1.raf=requestAnimationFrame(tick);
+    })();
+  };
+  function g1answer(opt,btn,ev){
+    if(g1.st!=='talk')return;g1.st='judge';cancelAnimationFrame(g1.raf);$('g1tbox').hidden=true;
+    var all=$('g1choices').querySelectorAll('.choice');
+    all.forEach(function(b){b.disabled=true;});
+    if(btn)btn.classList.add(opt.s>0?'right':(opt.s<0?'wrong':'meh'));
+    var at=btn?{x:(ev&&ev.clientX)||center(btn).x,y:(ev&&ev.clientY)||center(btn).y}:center($('g1stage'));
+    if(!btn)opt.w='<b class="bad">시간 초과!</b> '+opt.w;
+    if(opt.s>0){g1.score++;burst(at.x,at.y,22,['#5fd68a','#eef3ea','#f4c64e']);}
+    g1.marks[g1.i]=opt.s>0?'good':(opt.s<0?'bad':'meh');g1pips();
+    var head=opt.s>0?'<span class="good">좋은 응대!</span> ':(opt.s<0?'<span class="bad">신뢰가 깎였어요.</span> ':'<span style="color:var(--mid)">애매해요.</span> ');
+    $('g1why').innerHTML=head+opt.w;
+    trust(opt.s,null,at);
+    g1.i++;
+    setTimeout(function(){
+      if(g1.i<3){g1wait();return;}
+      g1.st='idle';$('g1choices').hidden=true;$('g1call').hidden=true;$('g1phone').hidden=false;
+      var avg=Math.round(g1.rts.reduce(function(a,b){return a+b;},0)/g1.rts.length);
+      $('g1txt').textContent=g1.score+' / 3';
+      if(g1.best===null||isNaN(g1.best)||g1.score>g1.best){g1.best=g1.score;store('g1best2',String(g1.score));}
+      var bonus=g1.score===3?'<span class="good">민원 해결 장인! 보너스 신뢰 +1</span> · ':'';
+      $('g1res').innerHTML=bonus+'정답 '+g1.score+'/3 · 평균 응답 '+avg+'ms · '+g1bestTxt();
+      if(g1.score===3){trust(1,null,center(g1stage));banner('민원 완벽 해결');}
+      $('g1start').disabled=false;$('g1start').textContent='다시 하기';
+    },2400);
+  }
+
+  /* ===== 게임 2: 결재 도장 연타 ===== */
+  var g2={dur:5000,on:false,n:0,end:0,raf:0,best:parseInt(store('g2best')||'',10)||0};
+  $('g2res').textContent=g2.best?'최고 기록: '+g2.best+'장':'최고 기록: –';
+  var paper=$('g2paper');
+  function stampAt(x,y){
+    var s=document.createElement('span');s.className='stamp';s.textContent='결재';
+    s.style.left=x+'px';s.style.top=y+'px';s.style.setProperty('--r',(Math.random()*40-20)+'deg');
+    paper.appendChild(s);var all=paper.querySelectorAll('.stamp');if(all.length>40)all[0].remove();
+  }
+  function g2hit(e){
+    if(!g2.on)return;
+    var r=paper.getBoundingClientRect(),x,y;
+    if(e&&e.clientX){x=e.clientX-r.left;y=e.clientY-r.top;}else{x=20+Math.random()*(r.width-40);y=20+Math.random()*(r.height-40);}
+    stampAt(x,y);g2.n++;var c=$('g2count');c.textContent=g2.n;c.classList.remove('pop');void c.offsetWidth;c.classList.add('pop');
+    paper.classList.remove('hit');void paper.offsetWidth;paper.classList.add('hit');
+    if(g2.n%10===0){fx(r.left+x,r.top+y,g2.n+'장!','var(--seal)');burst(r.left+x,r.top+y,12,['#c8352a','#f4c64e']);}
+  }
+  paper.addEventListener('pointerdown',function(e){e.preventDefault();g2hit(e);});
+  paper.addEventListener('keydown',function(e){if(e.key===' '||e.key==='Enter'){e.preventDefault();g2hit(null);}});
+  function g2tick(){
+    var left=Math.max(0,g2.end-performance.now());$('g2timer').style.transform='scaleX('+(left/g2.dur)+')';
+    if(left>0){g2.raf=requestAnimationFrame(g2tick);return;}
+    g2.on=false;$('g2start').disabled=false;
+    if(g2.n>g2.best){g2.best=g2.n;store('g2best',String(g2.n));}
+    var d=g2.n>=30?2:(g2.n>=20?1:0);
+    var msg=d===2?'<span class="good">결재 기계! 신뢰 +2</span>':(d===1?'<span class="good">일 잘하시네요. 신뢰 +1</span>':'서류가 아직 쌓여 있어요.');
+    $('g2res').innerHTML=g2.n+'장 · '+msg+' · 최고 '+g2.best+'장';
+    trust(d,null,center($('g2stage')));
+  }
+  $('g2start').onclick=function(){
+    paper.querySelectorAll('.stamp').forEach(function(s){s.remove();});
+    g2.dur=DIFF.stamp[level()]*1000;
+    g2.n=0;$('g2count').textContent='0';g2.on=true;g2.end=performance.now()+g2.dur;
+    $('g2start').disabled=true;$('g2res').textContent=(g2.dur/1000)+'초! 찍어요! 찍어요!';paper.focus();
+    cancelAnimationFrame(g2.raf);g2tick();
+  };
+
+  /* ===== 게임 3: 질문 타이밍 ===== */
+  var g3={on:false,free:false,ok:0,bad:0,flip:null,end:null};
+  var lamp=$('g3lamp'),busy=['통화 중','결재 중','회의 중','민원 응대 중'];
+  function g3set(free){g3.free=free;lamp.className='lamp '+(free?'free':'busy');$('g3state').textContent=free?'지금 여유 있음':busy[Math.floor(Math.random()*busy.length)];}
+  function g3loop(){if(!g3.on)return;g3set(Math.random()<DIFF.free[level()]);g3.flip=setTimeout(g3loop,500+Math.random()*1000);}
+  $('g3ask').onclick=function(){
+    if(!g3.on)return;var p=center(lamp);
+    if(g3.free){g3.ok++;fx(p.x,p.y-20,'질문 성공!','var(--high)');burst(p.x,p.y,16,['#5fd68a','#5fc8f0']);g3set(false);}
+    else{g3.bad++;fx(p.x,p.y-20,'지금은 바빠…','var(--low)');}
+    $('g3res').textContent='성공 '+g3.ok+' · 실패 '+g3.bad;
+  };
+  $('g3start').onclick=function(){
+    g3.on=true;g3.ok=0;g3.bad=0;$('g3res').textContent='성공 0 · 실패 0';
+    $('g3ask').disabled=false;$('g3start').disabled=true;g3loop();clearTimeout(g3.end);
+    g3.end=setTimeout(function(){
+      g3.on=false;clearTimeout(g3.flip);lamp.className='lamp';$('g3state').textContent='하교 시간';
+      $('g3ask').disabled=true;$('g3start').disabled=false;
+      var score=g3.ok-g3.bad,d=score>=5?2:(score>=2?1:(score<0?-1:0));
+      var msg=d>0?'<span class="good">눈치 만렙! 신뢰 +'+d+'</span>':(d<0?'<span class="bad">타이밍이 아쉬워요. 신뢰 −1</span>':'무난했어요.');
+      $('g3res').innerHTML='성공 '+g3.ok+' · 실패 '+g3.bad+' · '+msg;
+      trust(d,null,center($('g3stage')));
+    },10000);
+  };
+
+  /* ===== 게임 4: 할 일 카드 러시 ===== */
+  var TASKS=['수학 수행평가','영어 단어 시험','동아리 보고서','학원 숙제','독서록','실험 보고서','진로 활동지','화법 개요서','물리 문제집','봉사 시간 확인'];
+  var TRAPS=['릴스 한 편만','단톡방 알림','게임 한 판만'];
+  var g4={on:false,ok:0,miss:0,trap:0,spawn:null,end:0,raf:0,best:parseInt(store('g4best')||'',10)||0};
+  var slots=$('g4slots').children;
+  function g4spawn(){
+    if(!g4.on)return;
+    var empty=[];for(var i=0;i<slots.length;i++){if(!slots[i].querySelector('.card:not(.gone):not(.miss)'))empty.push(slots[i]);}
+    if(empty.length){
+      var slot=empty[Math.floor(Math.random()*empty.length)],trap=Math.random()<.25;
+      var life=(trap?1800:1700+Math.random()*900)*DIFF.life[level()];
+      var c=document.createElement('button');c.type='button';c.className='card'+(trap?' trap':'');
+      c.textContent=trap?TRAPS[Math.floor(Math.random()*TRAPS.length)]:TASKS[Math.floor(Math.random()*TASKS.length)];
+      var lb=document.createElement('span');lb.className='life';var li=document.createElement('span');li.style.animationDuration=life+'ms';lb.appendChild(li);c.appendChild(lb);
+      var tid=setTimeout(function(){if(c.classList.contains('gone'))return;c.classList.add(trap?'gone':'miss');if(!trap){g4.miss++;g4score();}setTimeout(c.remove.bind(c),360);},life);
+      c.addEventListener('pointerdown',function(e){
+        e.preventDefault();if(!g4.on||c.classList.contains('gone')||c.classList.contains('miss'))return;
+        clearTimeout(tid);c.classList.add('gone');setTimeout(c.remove.bind(c),320);
+        if(trap){g4.trap++;fx(e.clientX,e.clientY,'딴짓 걸림!','#b9a3f0');}
+        else{g4.ok++;fx(e.clientX,e.clientY,'제출!','var(--gooding)');burst(e.clientX,e.clientY,12,['#5fc8f0','#eef3ea']);}
+        g4score();
+      });
+      c.addEventListener('keydown',function(e){if(e.key==='Enter'||e.key===' '){e.preventDefault();c.dispatchEvent(new PointerEvent('pointerdown',{clientX:center(c).x,clientY:center(c).y}));}});
+      slot.appendChild(c);
+    }
+    g4.spawn=setTimeout(g4spawn,420+Math.random()*380);
+  }
+  function g4score(){$('g4res').textContent='제출 '+g4.ok+' · 놓침 '+g4.miss+' · 딴짓 '+g4.trap;}
+  function g4tick(){
+    var left=Math.max(0,g4.end-performance.now());$('g4timer').style.transform='scaleX('+(left/15000)+')';
+    if(left>0){g4.raf=requestAnimationFrame(g4tick);return;}
+    g4.on=false;clearTimeout(g4.spawn);
+    setTimeout(function(){for(var i=0;i<slots.length;i++)slots[i].innerHTML='';$('g4idle').hidden=false;$('g4idle').textContent='하교!';},400);
+    $('g4start').disabled=false;
+    var pts=g4.ok-g4.miss-2*g4.trap;
+    if(pts>g4.best){g4.best=pts;store('g4best',String(pts));}
+    var d=pts>=12?2:(pts>=6?1:(pts<0?-1:0));
+    var msg=d>0?'<span class="good">갓생 성공! 신뢰 +'+d+'</span>':(d<0?'<span class="bad">밀린 게 너무 많아요. 신뢰 −1</span>':'무난한 하루였어요.');
+    $('g4res').innerHTML='제출 '+g4.ok+' · 놓침 '+g4.miss+' · 딴짓 '+g4.trap+' · 점수 '+pts+' · '+msg+' · 최고 '+g4.best+'점';
+    trust(d,null,center($('g4stage')));
+  }
+  $('g4start').onclick=function(){
+    for(var i=0;i<slots.length;i++)slots[i].innerHTML='';
+    $('g4idle').hidden=true;g4.ok=0;g4.miss=0;g4.trap=0;g4score();
+    g4.on=true;g4.end=performance.now()+15000;$('g4start').disabled=true;
+    cancelAnimationFrame(g4.raf);clearTimeout(g4.spawn);g4spawn();g4tick();
+  };
+  $('g4res').textContent=g4.best?'최고 기록: '+g4.best+'점':'제출 0 · 놓침 0 · 딴짓 0';
+
+  /* ===== 모드 탭 ===== */
+  var tabs=[['tab-s','panel-s'],['tab-g','panel-g']];
+  tabs.forEach(function(p){
+    $(p[0]).addEventListener('click',function(){
+      tabs.forEach(function(q){var on=q[0]===p[0];$(q[0]).setAttribute('aria-selected',on?'true':'false');$(q[1]).hidden=!on;});
+    });
+  });
+})();
+</script>
+<script>
+(function(){var g=document.getElementById('ledrow');if(!g)return;var ns='http://www.w3.org/2000/svg';
+for(var i=0;i<15;i++){var r=document.createElementNS(ns,'rect');r.setAttribute('x',320+i*17.6);r.setAttribute('y',200);r.setAttribute('width',13);r.setAttribute('height',14);r.setAttribute('rx',3);
+r.setAttribute('fill',i<5?'#ef5b4c':i<10?'#f4a43a':'#5fd68a');r.setAttribute('opacity',i<9?1:.25);g.appendChild(r);}})();
+</script>
+<script>
+/* ===== 미연시 맛보기 ===== */
+(function(){
+  function $(i){return document.getElementById(i);}
+  var reduce=window.matchMedia&&matchMedia('(prefers-reduced-motion: reduce)').matches;
+  var R={
+    s:{name:'쌤 루트',color:'var(--ssam)',scenes:[
+      {when:'08:20',where:'교무실 · 전화',who:'학부모',tone:'#c792ea',bg:'office',
+       line:'선생님, 저희 애가 수행평가 기준을 몰랐다고 하던데요. 공지가 제대로 된 건가요?',
+       ch:[['공지는 다 했습니다. 아이가 확인을 안 한 거죠.',-2,'사실이어도 탓하는 말로 들렸어요. 학부모는 더 서운해졌어요.'],
+           ['걱정되셨겠어요. 공지한 내용을 다시 보내 드리고, 아이와도 한번 이야기해 볼게요.',2,'걱정을 먼저 받아 주고 할 일을 말했어요.'],
+           ['지금 수업 들어가야 해서요. 나중에 다시 전화 주세요.',-1,'바쁜 건 맞지만, 언제 이야기할지 정하지 않았어요.']]},
+      {when:'10:50',where:'쉬는 시간 · 교무실 앞',who:'학생 민준',tone:'#5fc8f0',bg:'hall',
+       line:'쌤, 질문 하나만 해도 돼요? …바쁘세요?',
+       ch:[['지금은 좀 바빠. 다음에 와.',-1,'민준이는 “다음”이 언제인지 몰라서 다시 안 올 수도 있어요.'],
+           ['결재 하나만 끝내고 3분 뒤에 볼게. 여기 잠깐 앉아 있을래?',2,'바쁜 사정을 말하고 시간을 약속했어요.'],
+           ['그런 건 교과서에 다 나와 있잖아.',-2,'질문하러 오기까지 용기가 필요했을 거예요.']]},
+      {when:'16:30',where:'방과 후 · 교실',who:'학생 민준',tone:'#5fc8f0',bg:'class',
+       line:'쌤, 오늘 하루 종일 바빠 보이셨어요. 아까 질문 받아 주셔서 감사해요.',
+       ch:[['응, 오늘 전화가 많았어. 그래도 기다려 줘서 고마워.',2,'쌤의 하루를 솔직하게 말해서 서로 조금 더 알게 됐어요.'],
+           ['선생님은 원래 바빠.',0,'틀린 말은 아니지만 대화가 거기서 끝났어요.'],
+           ['(고개만 끄덕인다)',-1,'민준이는 쌤이 화난 줄 알았어요.']]}],
+     top:['쌤은 쉬는 시간에도 민원 전화와 결재를 처리하고 있었다.','학생은 “바빠”라는 말을 “오지 마”로 들을 수 있다.','시간을 약속해 주면 기다리는 쪽도 덜 불안하다.']},
+    g:{name:'고딩 루트',color:'var(--gooding)',scenes:[
+      {when:'13:10',where:'교무실 앞 · 점심시간',who:'박 쌤 (통화 중)',tone:'#f4c64e',bg:'hall',
+       line:'(통화 중) …네, 어머님. 네, 그 부분은 제가 다시 확인해 보겠습니다.',
+       ch:[['쌤! 쌤! 이거 지금 꼭 물어봐야 돼요!',-2,'통화 중인 쌤은 두 사람을 동시에 상대해야 했어요.'],
+           ['(통화가 끝날 때까지 기다렸다가) 바쁘신데 질문 하나 해도 될까요?',2,'상황을 보고 타이밍을 맞췄어요.'],
+           ['(그냥 교실로 돌아간다)',-1,'쌤은 질문하러 온 걸 몰라요. 궁금한 건 그대로 남았어요.']]},
+      {when:'16:20',where:'방과 후 · 교무실',who:'박 쌤',tone:'#f4c64e',bg:'office',
+       line:'수행평가 기준표는 지난주에 학급 게시판에 올렸는데, 못 봤어?',
+       ch:[['어디 올라온 줄 몰랐어요. 다음엔 단톡에도 올려 주시면 좋겠어요.',2,'몰랐던 이유와 바라는 점을 같이 말했어요.'],
+           ['아 몰라요, 안 봤어요.',-2,'쌤은 공지를 무시당했다고 느꼈어요.'],
+           ['봤는데 이 부분이 이해가 안 돼서요.',1,'무엇을 모르는지 콕 집어서 물었어요.']]},
+      {when:'22:00',where:'집 · 학원 끝나고',who:'박 쌤 (메시지)',tone:'#f4c64e',bg:'night',
+       line:'늦게까지 과제하느라 고생했다. 내일 모르는 거 있으면 아침에 와.',
+       ch:[['감사합니다! 내일 아침에 갈게요.',2,'짧아도 고맙다는 말이 전해졌어요.'],
+           ['(읽고 답장하지 않는다)',-1,'쌤은 메시지를 보냈는지 계속 신경 쓰였어요.'],
+           ['쌤도 오늘 전화 많이 받으셨죠? 고생하셨어요.',3,'쌤의 하루를 떠올려 준 한마디였어요.']]}],
+     top:['쌤이 점심시간에도 학부모 전화를 받고 있었다.','공지를 올린 곳과 학생이 보는 곳이 달랐다.','밤 10시에도 과제하는 학생을 쌤도 걱정하고 있었다.']}
+  };
+  var POS=['감사','고마','미안','죄송','이해','괜찮','같이','도와','기다','고생','걱정','덕분','언제','시간 되','부탁'];
+  var NEG=['몰라','싫','귀찮','나중','짜증','왜요','알아서','됐어','그만'];
+  var route=null,si=0,score=0,timer=null,typing=false,full='';
+  var pick=$('vnpick'),stage=$('vnstage'),txt=$('vntext'),chs=$('vnchoices'),end=$('vnend'),free=$('vnfree'),inp=$('vnin');
+  function T(d,m){if(window.__trust)window.__trust(d,m);}
+  function type(s,done){
+    clearInterval(timer);full=s;
+    if(reduce){txt.textContent=s;typing=false;done&&done();return;}
+    var i=0;typing=true;txt.textContent='';
+    timer=setInterval(function(){i++;txt.textContent=s.slice(0,i);if(i>=s.length){clearInterval(timer);typing=false;done&&done();}},22);
+  }
+  txt.addEventListener('click',function(){if(typing){clearInterval(timer);txt.textContent=full;typing=false;showChoices();}});
+  function steps(){var h='';for(var i=0;i<3;i++)h+='<i class="'+(i<si?'done':i===si?'now':'')+'"></i>';$('vnstep').innerHTML=h;}
+  function scene(){
+    var sc=R[route].scenes[si];
+    $('vnwhen').textContent=sc.when;$('vnwhere').textContent=sc.where;$('vnname').textContent=sc.who;
+    $('vnname').style.background=sc.tone;$('vnchar').style.color=sc.tone;
+    $('vnscene').className='vnscene bg-'+sc.bg;$('vnmouth').setAttribute('d','M86 102q14 10 28 0');
+    steps();chs.innerHTML='';free.hidden=true;
+    var c=$('vnchar');c.classList.remove('in');void c.offsetWidth;c.classList.add('in');
+    type(sc.line,showChoices);
+  }
+  function showChoices(){
+    if(chs.children.length)return;
+    var sc=R[route].scenes[si];
+    sc.ch.forEach(function(c,k){var b=document.createElement('button');b.type='button';b.className='vnc';b.innerHTML='<span class="k">'+'ABC'[k]+'</span>'+c[0];
+      b.onclick=function(){answer(c[1],c[2],c[0]);};chs.appendChild(b);});
+    free.hidden=false;
+  }
+  function answer(d,why,said){
+    chs.innerHTML='';free.hidden=true;score+=d;
+    $('vnmouth').setAttribute('d',d>0?'M84 98q16 16 32 0':d<0?'M86 108q14 -10 28 0':'M88 104h24');
+    T(d,(d>0?'<b>신뢰 +'+d+'</b> ':d<0?'<b>신뢰 −'+(-d)+'</b> ':'')+why);
+    var cls=d>0?'up':d<0?'down':'mid';
+    txt.innerHTML='<span class="said">나: '+esc(said)+'</span><span class="res '+cls+'">'+(d>0?'▲ 신뢰 +'+d:d<0?'▼ 신뢰 −'+(-d):'– 변화 없음')+'</span> '+esc(why);
+    var nb=document.createElement('button');nb.type='button';nb.className='btn '+(route==='s'?'ssam':'goo');
+    nb.textContent=si<2?'다음 장면 →':'엔딩 보기 →';nb.onclick=function(){si++;if(si<3)scene();else ending();};chs.appendChild(nb);nb.focus({preventScroll:true});
+  }
+  function esc(s){return String(s).replace(/[&<>"]/g,function(c){return{'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c];});}
+  free.addEventListener('submit',function(e){e.preventDefault();var s=inp.value.trim();if(!s)return;inp.value='';
+    var p=POS.some(function(w){return s.indexOf(w)>=0;}),n=NEG.some(function(w){return s.indexOf(w)>=0;});
+    var d=p&&!n?2:n&&!p?-1:0;
+    answer(d,d>0?'상대 입장을 생각하는 말이 들어 있어요. (데모는 단어로만 판단해요. 실제 게임은 AI가 문장 전체를 읽고 판단해요.)':d<0?'상대가 서운하게 들을 수 있는 말이 있어요. (데모 판단)':'데모는 이 말을 판단하기 어려워요. 실제 게임에서는 AI NPC가 이 말에 맞춰 대답해요.',s);});
+  function ending(){
+    var r=R[route],e=score>=5?['역지사지 성공','var(--high)']:score>=1?['아직은 평행선','var(--mid)']:['오해가 쌓인 하루','var(--low)'];
+    stage.querySelector('.vnbox').hidden=true;$('vnscene').hidden=true;end.hidden=false;
+    var other=route==='s'?'g':'s';
+    end.innerHTML='<span class="tag">'+r.name+' 엔딩 · 이번 판 점수 '+(score>0?'+':'')+score+'</span><h3 style="color:'+e[1]+'">'+e[0]+'</h3>'+
+      '<b class="tt">서로 몰랐던 일 TOP 3</b><ol>'+r.top.map(function(t){return '<li>'+t+'</li>';}).join('')+'</ol>'+
+      '<p class="small">실제 게임에서는 AI가 이번 판 대화 기록을 읽고 TOP 3를 새로 만들어요.</p>'+
+      '<div class="row"><button class="btn '+(other==='s'?'ssam':'goo')+'" type="button" id="vnother">'+R[other].name+'도 해 보기</button><button class="btn ghost" type="button" id="vnback">처음으로</button></div>';
+    $('vnother').onclick=function(){start(other);};$('vnback').onclick=reset;
+  }
+  function start(r){route=r;si=0;score=0;pick.hidden=true;stage.hidden=false;end.hidden=true;stage.querySelector('.vnbox').hidden=false;$('vnscene').hidden=false;
+    stage.className='vnstage r-'+r;scene();}
+  function reset(){clearInterval(timer);pick.hidden=false;stage.hidden=true;}
+  Array.prototype.forEach.call(pick.querySelectorAll('.route'),function(b){b.onclick=function(){start(b.getAttribute('data-route'));};});
+})();
+</script>
+</body>
+</html>

@@ -26,8 +26,17 @@ team418-hackathon/
 │  └─ backgrounds/      ← 배경 5종 (사람 없음)
 ├─ site/                ← 지금 배포된 소개 사이트 (index.html, build.html, 소개 영상)
 ├─ server/              ← AI NPC 서버 (키를 숨기는 곳) — 만들 예정
+├─ tools/
+│  ├─ scripts/          ← cutout.py (그림 자르기·배경 지우기), check_endings.js (엔딩 도달 확인)
+│  └─ intro-video/      ← 15초 소개 영상 원본 (코드로 만든 영상)
 └─ docs/
-   └─ prompts.md        ← 에셋 만들 때 쓴 나노바나나 프롬프트
+   ├─ history.md            ← 프로젝트 흐름 · 결정 기록 · 남은 일  ⭐ 처음 오면 여기부터
+   ├─ conversation-notes.md ← Claude 와 나눈 대화 정리 (시간 순)
+   ├─ vn-design.md          ← 미연시 설계: 인물 6명 · 장면표 · 엔딩 15종 조건
+   ├─ ai-tools.md           ← NPC AI(JSON) · 그림 AI 비교 · 크레딧 · 주의점
+   ├─ prompts.md            ← Higgsfield · 나노바나나 프롬프트 전체
+   ├─ asset-pipeline.md     ← 에셋 만드는 순서 · 배경 지우기 · 영상 · 배포
+   └─ archive/              ← 옛 사이트 버전(하드웨어 시절 배선도 포함), SVG vs AI 비교, 프롬프트 페이지
 ```
 
 ## 캐릭터 · 에셋

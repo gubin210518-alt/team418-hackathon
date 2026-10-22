@@ -1,0 +1,848 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>역지사지 조종석 부착도</title>
+<meta name="description" content="TEAM 418 역지사지 시뮬레이터 조종석 — 3D 부착도, ESP32 배선도, 핀 연결표, 가공 치수">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Black+Han+Sans&family=IBM+Plex+Sans+KR:wght@400;500;600;700&family=JetBrains+Mono:wght@500;700&display=swap">
+<style>
+/* 레이아웃: 상단 내비 → 제목 → 탭(3D 부착도 / 배선도) → 공유 부품 목록과 상세 카드 → 핀 연결표 → 확인할 것 → 가공 치수 → 미정 */
+:root{
+  --board:#0f1d19; --board-2:#152823; --board-3:#1b322b; --line:#2a433b;
+  --chalk:#eef3ea; --dust:#9fb3a9; --ink-dark:#10201b;
+  --ssam:#f4c64e; --gooding:#5fc8f0; --low:#ef5b4c; --mid:#f4a43a; --high:#5fd68a;
+  --p33:#ffb04a; --p5:#ef5b4c; --gnd:#8a9c95;
+  --c-rfid:#5fc8f0; --c-df:#c792ea; --c-hook:#f4c64e; --c-stand:#9fe0c1; --c-led:#5fd68a; --c-btn:#f59ac0; --c-esp:#eef3ea; --c-spk:#c792ea;
+  --f-display:'Black Han Sans','Apple SD Gothic Neo','Malgun Gothic',sans-serif;
+  --f-body:'IBM Plex Sans KR',system-ui,-apple-system,'Apple SD Gothic Neo','Malgun Gothic',sans-serif;
+  --f-mono:'JetBrains Mono',ui-monospace,Menlo,monospace;
+  color-scheme:dark;
+}
+*{box-sizing:border-box}
+[hidden]{display:none!important}
+html{padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px);background:var(--board)}
+body{margin:0;background:var(--board);color:var(--chalk);font-family:var(--f-body);font-size:15.5px;line-height:1.65;word-break:keep-all;overflow-wrap:break-word;overflow-x:hidden;
+  background-image:radial-gradient(ellipse at 15% -5%,rgba(244,198,78,.10),transparent 50%),radial-gradient(ellipse at 90% 0%,rgba(95,200,240,.10),transparent 48%);background-repeat:no-repeat}
+.band{padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px))}
+.wrap{max-width:1180px;margin:0 auto;width:100%}
+.wrap>*,main>*,.sec>*,.panel>*,figure>*{min-width:0}
+a{color:inherit}
+a:focus-visible,button:focus-visible,input:focus-visible,summary:focus-visible{outline:2px solid var(--chalk);outline-offset:3px}
+h1{font-family:var(--f-display);font-weight:400;font-size:clamp(30px,6vw,48px);line-height:1.15;margin:0;text-wrap:balance}
+h2{font-family:var(--f-display);font-weight:400;font-size:clamp(22px,3.6vw,30px);line-height:1.2;margin:0;text-wrap:balance}
+h3{font-size:16px;margin:0;font-weight:600}
+p{margin:0;max-width:70ch}
+.tag{font-family:var(--f-mono);font-size:12.5px;letter-spacing:.03em;color:var(--dust)}
+.small{font-size:13.5px;color:var(--dust)}
+button{font:inherit;color:inherit}
+
+.top{display:flex;justify-content:space-between;align-items:center;gap:8px 16px;flex-wrap:wrap;padding-block:16px;border-bottom:1px dashed var(--line)}
+.top .tag b{color:var(--chalk);font-weight:700}
+.bell{display:inline-flex;align-items:center;gap:8px}
+.bell i{width:8px;height:8px;border-radius:50%;background:var(--low);box-shadow:0 0 10px var(--low);animation:blink 1.6s steps(2) infinite}
+@keyframes blink{50%{opacity:.2}}
+.nav{display:flex;gap:6px;flex-wrap:wrap}
+.nav a{text-decoration:none;font-size:14px;font-weight:600;padding:7px 14px;border-radius:999px;border:1px solid var(--line);background:var(--board-2);transition:border-color .15s}
+.nav a:hover{border-color:var(--chalk)}
+.nav a[aria-current="page"]{background:var(--chalk);color:var(--ink-dark);border-color:var(--chalk)}
+
+main{display:flex;flex-direction:column;gap:22px;padding-block:28px 60px}
+.head{display:flex;flex-direction:column;gap:10px}
+.head p{color:var(--dust)}
+.head p b{color:var(--chalk)}
+
+.tabs{display:flex;gap:8px;flex-wrap:wrap}
+.tab{font-family:var(--f-display);font-size:19px;cursor:pointer;padding:9px 20px;border-radius:12px;border:2px solid var(--line);background:transparent;color:var(--dust);transition:background .2s,color .2s,border-color .2s}
+.tab[aria-selected="true"]{background:var(--chalk);border-color:var(--chalk);color:var(--ink-dark)}
+
+.card{background:var(--board-2);border:1px solid var(--line);border-radius:14px}
+.panel{display:flex;flex-direction:column;gap:12px}
+
+.dims{display:flex;flex-wrap:wrap;gap:10px 14px;align-items:flex-end;padding:12px 14px}
+.dims label{display:flex;flex-direction:column;gap:3px;font-size:13px;color:var(--dust)}
+.dims input{width:6em;font:inherit;font-family:var(--f-mono);font-variant-numeric:tabular-nums;color:var(--chalk);background:var(--board);border:1px solid var(--line);border-radius:8px;padding:6px 8px}
+.dims .out{font-size:13.5px;color:var(--dust);flex:1 1 220px;min-width:0}
+.dims .out b{color:var(--chalk)}
+.dims .err{color:var(--low)}
+.btn{cursor:pointer;border-radius:999px;padding:7px 14px;border:1px solid var(--line);background:transparent;color:var(--dust);font-size:14px;font-weight:600;white-space:nowrap}
+.btn:hover{border-color:var(--chalk);color:var(--chalk)}
+
+.bar{display:flex;flex-wrap:wrap;gap:8px 16px;align-items:center}
+.seg{display:flex;flex-wrap:wrap;gap:6px;align-items:center}
+.lab{font-family:var(--f-mono);font-size:12px;color:var(--dust)}
+.tg{border:1px solid var(--line);background:var(--board-2);padding:6px 12px;border-radius:8px;cursor:pointer;font-size:14px;min-height:36px;transition:border-color .15s,background .15s}
+.tg:hover{border-color:var(--chalk)}
+.tg[aria-pressed="true"]{background:var(--chalk);border-color:var(--chalk);color:var(--ink-dark)}
+.slider{display:flex;align-items:center;gap:8px;font-size:14px}
+.slider input{accent-color:var(--high);width:150px}
+.slider output{font-family:var(--f-mono);font-variant-numeric:tabular-nums;min-width:3.6em}
+
+.stage{position:relative;width:100%;height:clamp(380px,62vh,640px);background:#0b1613;border:1px solid var(--line);border-radius:14px;overflow:hidden}
+.stage canvas{position:absolute;inset:0;display:block;width:100%!important;height:100%!important;touch-action:none}
+#pins{position:absolute;inset:0;pointer-events:none;overflow:hidden}
+.pin{position:absolute;left:0;top:0;width:26px;height:26px;border-radius:50%;padding:0;pointer-events:auto;cursor:pointer;background:var(--chalk);color:var(--ink-dark);border:2px solid var(--board);font-family:var(--f-mono);font-size:12px;font-weight:700;line-height:22px;text-align:center;box-shadow:0 2px 6px rgba(0,0,0,.5)}
+.pin.dim{opacity:.3}
+.pin.sel{background:var(--ssam);width:32px;height:32px;line-height:28px;z-index:2}
+.hint{position:absolute;left:12px;bottom:10px;font-size:12px;color:var(--dust);pointer-events:none;font-family:var(--f-mono)}
+.fail{position:absolute;inset:0;display:grid;place-items:center;padding:24px;text-align:center;color:var(--dust)}
+
+.sheet{overflow-x:auto;padding:6px 0}
+.sheet svg{display:block;width:100%;height:auto}
+.sheet svg.tall{display:none;max-width:560px;margin:0 auto}
+.sheet svg.tall .wire{stroke-width:2.4}
+@media (max-width:760px){.sheet svg.wide{display:none}.sheet svg.tall{display:block}}
+.legend{display:flex;flex-wrap:wrap;gap:6px 16px;align-items:center;padding:10px 16px 12px;border-top:1px solid var(--line);font-size:13.5px;color:var(--dust)}
+.key{display:inline-flex;align-items:center;gap:6px}
+.chip{display:inline-block;font-family:var(--f-mono);font-size:11.5px;font-weight:700;padding:1px 8px;border-radius:9px;color:#10201b;white-space:nowrap}
+.c33{background:var(--p33)} .c5{background:var(--p5);color:#fff} .cgnd{background:var(--gnd)} .csig{background:var(--chalk)}
+.swipe{font-size:12.5px;color:var(--dust);padding:0 16px}
+@media (min-width:960px){.swipe{display:none}}
+
+/* SVG */
+.pcb{fill:#173a2d;stroke:#46c495;stroke-width:2}
+.usb{fill:#9aa7a2;stroke:#5c6a65}
+.can{fill:#2a3431;stroke:#59665f}
+.pcbt{font-family:var(--f-mono);font-size:12px;fill:#6f8a80}
+.pcbt.on{fill:var(--chalk);font-weight:700}
+.pcbt.p33{fill:var(--p33);font-weight:700}.pcbt.p5{fill:var(--p5);font-weight:700}.pcbt.g{fill:var(--gnd);font-weight:700}
+.pcbtt{font-family:var(--f-display);font-size:18px;fill:var(--chalk)}
+.pcbs{font-family:var(--f-mono);font-size:11px;fill:#8fb3a5}
+.hole{fill:#0b1613;stroke:#6f8a80;stroke-width:1.5}
+.hole.on{fill:var(--chalk);stroke:var(--chalk)}
+.part rect.box{fill:var(--board-2);stroke-width:2}
+.part text.pn{font-family:var(--f-display);font-size:16px;fill:var(--chalk)}
+.part text.pd{font-family:var(--f-mono);font-size:11.5px;fill:var(--dust)}
+.part text.tn{font-family:var(--f-mono);font-size:12px;fill:var(--chalk)}
+.part line.sep{stroke:var(--line)}
+.wire{fill:none;stroke-width:3;stroke-linejoin:round;stroke-linecap:round}
+.res rect{fill:#e9dcc0;stroke:#7a6a48}
+.res text{font-family:var(--f-mono);font-size:11px;fill:var(--chalk)}
+.ptag rect{stroke:none}
+.ptag text{font-family:var(--f-mono);font-size:11px;font-weight:700;text-anchor:middle}
+.ptag.t33 rect{fill:var(--p33)} .ptag.t5 rect{fill:var(--p5)} .ptag.tgnd rect{fill:var(--gnd)} .ptag.tnote rect{fill:var(--board-3);stroke:var(--line)}
+.ptag.t33 text,.ptag.tgnd text{fill:#10201b} .ptag.t5 text{fill:#fff} .ptag.tnote text{fill:var(--dust)}
+g.part,path.wire,g.res{transition:opacity .2s}
+svg.focus .part,svg.focus .wire,svg.focus .res{opacity:.15}
+svg.focus .sel{opacity:1!important}
+
+/* 부품 목록 + 상세 */
+.pick{display:flex;flex-wrap:wrap;gap:6px}
+.pk{display:inline-flex;align-items:center;gap:8px;border:1px solid var(--line);background:var(--board-2);padding:6px 12px 6px 6px;border-radius:999px;cursor:pointer;font-size:14px;transition:border-color .15s,background .15s}
+.pk .n{width:22px;height:22px;border-radius:50%;display:inline-grid;place-items:center;font-family:var(--f-mono);font-size:12px;font-weight:700;color:#10201b}
+.pk:hover{border-color:var(--chalk)}
+.pk[aria-pressed="true"]{background:var(--chalk);color:var(--ink-dark);border-color:var(--chalk)}
+.detail{padding:16px 18px;display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:14px 20px}
+@media (max-width:760px){.detail{grid-template-columns:minmax(0,1fr)}}
+.detail .dh{grid-column:1/-1;display:flex;align-items:center;gap:10px;flex-wrap:wrap}
+.detail .dh .n{width:30px;height:30px;border-radius:50%;display:inline-grid;place-items:center;font-family:var(--f-mono);font-weight:700;color:#10201b}
+.detail .dh h3{font-family:var(--f-display);font-weight:400;font-size:22px}
+.detail .dh span{color:var(--dust);font-size:14px}
+.detail h4{margin:0 0 4px;font-family:var(--f-mono);font-size:12px;color:var(--dust);font-weight:500}
+.detail ul{margin:0;padding-left:1.1em;display:flex;flex-direction:column;gap:3px;font-size:14.5px}
+
+
+/* 준비물 */
+.sums{display:flex;flex-wrap:wrap;gap:10px}
+.sum{flex:1 1 140px;border:1px solid var(--line);border-radius:12px;background:var(--board-2);padding:12px 16px;display:flex;flex-direction:column;gap:2px}
+.sum .lab{font-family:var(--f-mono);font-size:12px;color:var(--dust)}
+.sum b{font-family:var(--f-mono);font-size:22px;font-variant-numeric:tabular-nums}
+.sum.big{border-color:var(--chalk)}
+.sum.big b{font-size:26px}
+h3.ph{font-family:var(--f-display);font-weight:400;font-size:21px;margin:6px 0 0}
+#pp td a{color:#5fc8f0;text-underline-offset:3px}
+#pp tfoot td{border-top:1px solid var(--chalk)}
+.have{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:12px}
+@media (max-width:820px){.have{grid-template-columns:minmax(0,1fr)}}
+.have .card{display:flex;flex-direction:column;gap:8px;padding:14px 16px}
+.have h3.ph{margin:0;font-size:19px}
+/* 표 */
+section.sec{display:flex;flex-direction:column;gap:12px;padding-top:12px}
+.tablebox{overflow-x:auto;border:1px solid var(--line);border-radius:14px;background:var(--board-2)}
+table{border-collapse:collapse;width:100%;min-width:680px;font-size:14px}
+th,td{text-align:left;padding:9px 14px;border-bottom:1px solid var(--line);vertical-align:top}
+tr:last-child td{border-bottom:0}
+th{font-family:var(--f-mono);font-size:12px;color:var(--dust);font-weight:500;white-space:nowrap}
+td.m{color:var(--dust)}
+td .chip{margin:1px 2px}
+td.num{font-family:var(--f-mono);font-variant-numeric:tabular-nums;white-space:nowrap}
+ul.notes{margin:0;padding-left:1.15em;display:flex;flex-direction:column;gap:8px;max-width:78ch}
+ul.notes b{color:var(--chalk)}
+ul.notes li{color:var(--dust)}
+
+footer{padding-block:24px 40px;border-top:1px dashed var(--line);color:var(--dust);font-size:13.5px}
+footer .wrap{display:flex;justify-content:space-between;gap:8px 12px;flex-wrap:wrap}
+@media (prefers-reduced-motion:reduce){*,*::before,*::after{animation:none!important;transition:none!important}}
+</style>
+</head>
+<body>
+<header class="band"><div class="wrap top">
+  <span class="tag bell"><i aria-hidden="true"></i><b>TEAM 418</b> · 2026 울산 AI 해커톤</span>
+  <nav class="nav" aria-label="페이지">
+    <a href="index.html">프로젝트 소개</a>
+    <a href="build.html" aria-current="page">부착도 · 배선도 · 준비물</a>
+  </nav>
+</div></header>
+
+<main class="band"><div class="wrap" style="display:flex;flex-direction:column;gap:22px">
+  <div class="head">
+    <span class="tag">조종석 하나 · ESP32 한 대</span>
+    <h1>역지사지 조종석 부착도</h1>
+    <p>쌤 구역과 고딩 구역이 나뉜 상자 하나에 부품을 어디에 붙이는지, ESP32에 어떻게 연결하는지, 무엇을 사야 하는지 아래 탭에서 골라 확인해요. <b>상자 치수를 넣으면 3D 모형과 가공 치수가 같이 바뀌어요.</b></p>
+  </div>
+
+  <div class="tabs" role="tablist" aria-label="보기 선택">
+    <button class="tab" role="tab" id="tab3d" aria-controls="p3d" aria-selected="true" type="button">3D 부착도</button>
+    <button class="tab" role="tab" id="tabw" aria-controls="pw" aria-selected="false" type="button">배선도</button>
+    <button class="tab" role="tab" id="tabp" aria-controls="pp" aria-selected="false" type="button">준비물</button>
+  </div>
+
+  <div class="panel" id="p3d" role="tabpanel" aria-labelledby="tab3d">
+    <div class="card dims">
+      <label>가로 (cm)<input id="dW" type="number" min="36" max="80" step="1" value="48" inputmode="decimal"></label>
+      <label>세로 (cm)<input id="dD" type="number" min="24" max="50" step="1" value="30" inputmode="decimal"></label>
+      <label>높이 (cm)<input id="dH" type="number" min="6" max="20" step="0.5" value="10" inputmode="decimal"></label>
+      <label>판 두께 (cm)<input id="dT" type="number" min="0.3" max="1" step="0.1" value="0.5" inputmode="decimal"></label>
+      <button class="btn" id="dReset" type="button">처음 값으로</button>
+      <p class="out" id="dOut"></p>
+    </div>
+    <div class="bar">
+      <div class="seg"><span class="lab">상태</span>
+        <button class="tg" id="tTop" type="button" aria-pressed="false">상판 투명</button>
+        <button class="tg" id="tHook" type="button" aria-pressed="false">수화기 들기</button>
+        <button class="tg" id="tPhone" type="button" aria-pressed="true">폰 올리기</button>
+        <button class="tg" id="tNum" type="button" aria-pressed="true">번호 표시</button>
+      </div>
+      <div class="seg"><span class="lab">시점</span>
+        <button class="tg" data-view="iso" type="button" aria-pressed="true">전체</button>
+        <button class="tg" data-view="front" type="button" aria-pressed="false">정면</button>
+        <button class="tg" data-view="top" type="button" aria-pressed="false">위에서</button>
+      </div>
+      <label class="slider"><span class="lab">LED 게이지</span><input id="ledv" type="range" min="0" max="15" value="7"><output id="ledo">7 / 15</output></label>
+    </div>
+    <div class="stage" id="stage">
+      <div id="pins"></div>
+      <span class="hint">끌어서 회전 · 휠이나 두 손가락으로 확대</span>
+    </div>
+  </div>
+
+  <div class="panel" id="pw" role="tabpanel" aria-labelledby="tabw" hidden>
+    <figure class="card" style="margin:0">
+      <div class="sheet"><svg id="wsvg" class="wide" viewBox="0 0 1140 700" role="img" aria-label="ESP32 배선도. 가운데 USB-C가 위로 오게 그린 ESP32 보드, 왼쪽에 수화기 스위치·DFPlayer·스피커·RFID, 오른쪽에 LED 스트립·폰 거치대 스위치·아케이드 버튼 5개가 있고 각 신호선이 보드 핀으로 이어져요."></svg>
+        <svg id="wsvg2" class="tall" viewBox="0 0 500 1360" role="img" aria-label="휴대폰용 배선도. 위에 ESP32 보드, 아래에 부품 상자가 두 줄로 있고 각 신호선이 옆쪽으로 올라가 보드 핀에 이어져요."></svg></div>
+      <figcaption class="legend">
+        <span class="key"><span class="chip csig">D25</span> 그 이름의 보드 핀</span>
+        <span class="key"><span class="chip c33">3.3V</span> 3.3V 줄 (보드 3V3)</span>
+        <span class="key"><span class="chip c5">5V</span> 5V 줄 (보드 VIN)</span>
+        <span class="key"><span class="chip cgnd">GND</span> GND 줄</span>
+        <span>부품을 누르면 그 부품 선만 진하게 보여요.</span>
+      </figcaption>
+    </figure>
+  </div>
+
+  <div class="panel" id="pp" role="tabpanel" aria-labelledby="tabp" hidden>
+    <div class="sums">
+      <div class="sum"><span class="lab">상품</span><b>42,940원</b></div>
+      <div class="sum"><span class="lab">배송비</span><b>6,000원</b></div>
+      <div class="sum big"><span class="lab">총액</span><b>48,940원</b></div>
+    </div>
+    <h3 class="ph">사야 할 것 · G마켓 4곳</h3>
+    <div class="tablebox"><table>
+      <thead><tr><th>판매처</th><th>상품 (누르면 상품 페이지)</th><th>쓰는 곳</th><th>수량</th><th>금액(원)</th><th>주문할 때</th></tr></thead>
+      <tbody><tr><td>에듀이노</td><td><a href="https://item.gmarket.co.kr/Item?goodscode=2030945976" target="_blank" rel="noopener">RFID-RC522 리더기 세트</a></td><td class="m">할 일 카드 읽기</td><td class="num">1</td><td class="num">2,200</td><td class="m"></td></tr><tr><td>에듀이노</td><td><a href="https://item.gmarket.co.kr/Item?goodscode=4839609846" target="_blank" rel="noopener">마이크로 리미트 스위치</a></td><td class="m">수화기 받침, 폰 거치대</td><td class="num">2</td><td class="num">1,100</td><td class="m">개당 550원</td></tr><tr><td>에듀이노</td><td><a href="https://item.gmarket.co.kr/Item?goodscode=4646853234" target="_blank" rel="noopener">네오픽셀 LED 스트립 15칸</a></td><td class="m">신뢰 게이지</td><td class="num">1</td><td class="num">6,600</td><td class="m">받으면 5V인지 확인</td></tr><tr><td>오션딜몰</td><td><a href="https://item.gmarket.co.kr/Item?goodscode=4383921376" target="_blank" rel="noopener">미니 스피커 3W</a></td><td class="m">벨소리, 민원 음성</td><td class="num">1</td><td class="num">12,000</td><td class="m">옵션 4옴 선택 (8옴 품절)</td></tr><tr><td>나인틴19</td><td><a href="https://item.gmarket.co.kr/Item?goodscode=4420901515" target="_blank" rel="noopener">60mm 아케이드 버튼 5개 (스위치 포함)</a></td><td class="m">도장, 질문, 모드 2개, 시작</td><td class="num">1</td><td class="num">16,800</td><td class="m">스위치 개수는 받아서 확인</td></tr><tr><td>오픈하드웨어</td><td><a href="https://item.gmarket.co.kr/Item?goodscode=2477619355" target="_blank" rel="noopener">점퍼선 수-수 40가닥</a></td><td class="m">브레드보드 안 배선</td><td class="num">1</td><td class="num">1,110</td><td class="m">옵션 02 수-수 30cm</td></tr><tr><td>오픈하드웨어</td><td><a href="https://item.gmarket.co.kr/Item?goodscode=2477619355" target="_blank" rel="noopener">점퍼선 암-수 40가닥</a></td><td class="m">RFID, 버튼·스위치 연결</td><td class="num">1</td><td class="num">1,110</td><td class="m">옵션 03 암-수 30cm</td></tr><tr><td>오픈하드웨어</td><td><a href="https://item.gmarket.co.kr/Item?goodscode=4280056862" target="_blank" rel="noopener">330Ω 저항 10개</a></td><td class="m">LED 데이터선</td><td class="num">1</td><td class="num">90</td><td class="m">옵션 330옴</td></tr><tr><td>오픈하드웨어</td><td><a href="https://item.gmarket.co.kr/Item?goodscode=4280058094" target="_blank" rel="noopener">1kΩ 저항 10개</a></td><td class="m">DFPlayer RX</td><td class="num">1</td><td class="num">90</td><td class="m">옵션 1K옴</td></tr><tr><td>오픈하드웨어</td><td><a href="https://item.gmarket.co.kr/Item?goodscode=1243904227" target="_blank" rel="noopener">830홀 브레드보드</a></td><td class="m">ESP32 꽂는 판</td><td class="num">2</td><td class="num">1,840</td><td class="m">두 개를 붙여서 써요</td></tr><tr><td>배송비</td><td>에듀이노 3,000 + 오픈하드웨어 3,000</td><td class="m">오션딜몰·나인틴19는 무료</td><td class="num">–</td><td class="num">6,000</td><td class="m"></td></tr></tbody>
+      <tfoot><tr><td colspan="4"><b>합계</b></td><td class="num"><b>48,940</b></td><td class="m">5만 원 안</td></tr></tfoot>
+    </table></div>
+    <p class="small">10월 22일 오전 G마켓 상품 페이지 기준이에요. 오후 2~3시 전에 주문하면 대부분 오늘 출고돼요(오션딜몰은 오후 6시). 결제는 지도교사 결재를 받은 뒤에 해요.</p>
+    <div class="have">
+      <div class="card">
+        <h3 class="ph">이미 있는 것</h3>
+        <ul class="notes">
+          <li><b>ESP32 HW-394 2개</b> · 하나는 예비</li>
+          <li><b>DFPlayer MINI</b> · 갖고 있는 걸 써요</li>
+          <li><b>microSD 카드</b> · FAT32로 포맷</li>
+        </ul>
+      </div>
+      <div class="card">
+        <h3 class="ph">동아리에서 빌릴 것</h3>
+        <ul class="notes">
+          <li><b>납땜인두, 땜납</b> · RFID 핀, 스위치, 버튼, LED 선</li>
+          <li><b>니퍼, 절연테이프나 수축튜브</b></li>
+          <li><b>글루건, 양면테이프, 케이블타이</b></li>
+          <li><b>데이터 되는 USB-C 케이블</b> · 충전 전용은 업로드 안 돼요</li>
+          <li><b>폼보드나 상자</b> · 조종석 몸체 (다이소)</li>
+        </ul>
+      </div>
+      <div class="card">
+        <h3 class="ph">문제 생기면 살 것</h3>
+        <ul class="notes">
+          <li><b>1000µF 콘덴서</b> · LED가 깜빡이거나 보드가 재부팅될 때</li>
+          <li><b>5V 2A 어댑터</b> · USB 전원이 모자랄 때</li>
+        </ul>
+      </div>
+    </div>
+  </div>
+
+  <div class="panel" id="pickpanel">
+    <div class="pick" id="pick" role="group" aria-label="부품 하나씩 보기"></div>
+    <div class="card detail" id="detail" aria-live="polite"></div>
+  </div>
+
+  <section class="sec" id="pinmap">
+    <h2>핀 연결표</h2>
+    <div class="tablebox"><table>
+      <thead><tr><th>부품</th><th>부품 쪽</th><th>연결할 곳</th><th>메모</th></tr></thead>
+      <tbody id="pinrows"></tbody>
+    </table></div>
+  </section>
+
+  <section class="sec">
+    <h2>연결 전에 확인할 것</h2>
+    <ul class="notes">
+      <li><b>선을 꽂거나 뺄 때는 USB를 먼저 빼요.</b> 켜진 상태에서 5V 선이 GPIO나 3V3 핀에 닿으면 보드가 망가질 수 있어요.</li>
+      <li><b>RFID-RC522는 3.3V 전용이에요.</b> VCC를 5V 줄에 꽂으면 모듈이 망가질 수 있어요.</li>
+      <li><b>버튼과 리미트 스위치는 저항 없이 연결해요.</b> 코드에서 INPUT_PULLUP으로 두면 누를 때 LOW가 돼요. 리미트 스위치는 COM과 NO 단자를 써요.</li>
+      <li><b>LED 15칸을 다 밝게 켜면 전류가 많이 흘러요.</b> 칸당 최대 약 60mA라서 전부 흰색 최대면 0.9A 가까이 돼요. 코드에서 밝기를 낮게(예: 255 중 50) 두고, 그래도 재부팅되면 5V 2A 어댑터를 5V 줄에 넣고 GND를 같이 묶어요.</li>
+      <li><b>LED 데이터선은 DIN 쪽 끝에 연결해요.</b> 스트립에 그려진 화살표가 나가는 방향의 반대쪽 끝이 입력이에요. 데이터선 중간에 330Ω 저항을 넣어요.</li>
+      <li><b>DFPlayer RX 앞에 1kΩ 저항을 넣어요.</b> microSD는 FAT32로 포맷하고 파일 이름을 0001.mp3, 0002.mp3처럼 붙여요.</li>
+      <li><b>보드의 D2, D5, D12, D15는 쓰지 않았어요.</b> 부팅 방식에 영향을 주는 핀이에요. RX0·TX0은 업로드에 쓰여서, D34·D35·VP·VN은 입력 전용이고 내부 풀업이 없어서 비워 둬요.</li>
+      <li><b>보드에 인쇄된 이름과 코드 번호는 같은 핀이에요.</b> 보드의 D32가 코드의 GPIO32(코드에서는 32)예요.</li>
+    </ul>
+  </section>
+
+  <section class="sec">
+    <h2>가공 치수</h2>
+    <p class="small">상판 위치는 상판 <b style="color:var(--chalk)">왼쪽 앞 모서리</b>에서 잰 값이에요 (가로 → 오른쪽, 세로 → 뒤쪽). 위의 치수를 바꾸면 같이 바뀌어요.</p>
+    <div class="tablebox"><table>
+      <thead><tr><th>대상</th><th>위치</th><th>크기</th><th>메모</th></tr></thead>
+      <tbody id="cutrows"></tbody>
+    </table></div>
+  </section>
+
+  <section class="sec">
+    <h2>아직 정해지지 않은 것</h2>
+    <ul class="notes">
+      <li><b>ESP32 보드는 콜드박스 때와 같은 HW-394(30핀, USB-C)로 가정했어요.</b> 집에 있는 보드가 다르면 핀 위치는 달라도 핀 이름(D32 등)으로 연결하면 돼요. 두 번째 ESP32는 예비로 둬요.</li>
+      <li><b>조종석 상자 치수를 아직 몰라요.</b> 처음 값(48 × 30 × 10cm)은 제가 가정한 값이에요. 폼보드로 만들지, 있는 상자를 쓸지 정해서 위 칸에 넣어 주세요.</li>
+      <li><b>330Ω, 1kΩ 저항은 준비물 탭의 구매 목록에 넣었어요.</b> 1000µF 콘덴서는 LED가 깜빡거릴 때만 사서 넣어요.</li>
+      <li><b>네오픽셀 스트립의 길이와 전압을 받아서 확인해야 해요.</b> 모형은 15칸 25cm, 5V로 가정했어요. 12V 제품이면 이 배선으로는 안 돼요.</li>
+      <li><b>아케이드 버튼의 색과 장착 구멍 지름은 받아서 재야 해요.</b> 구멍은 버튼 나사 몸통 지름보다 1mm 크게 뚫어요. 모형의 버튼 색은 예시예요.</li>
+      <li><b>수화기 모형을 무엇으로 만들지 정해야 해요.</b> 장난감 전화기 수화기나 폼보드로 만든 모형을 받침에 올려 리미트 스위치를 누르게 해요.</li>
+      <li><b>RFID가 상판을 통과해서 읽히는지 아직 실험하지 않았어요.</b> 안 읽히면 카드 찍는 곳만 상판을 뚫고 얇은 투명 판을 덮어요.</li>
+    </ul>
+  </section>
+</div></main>
+
+<footer class="band"><div class="wrap">
+  <span>TEAM 418 · 신정고 매니악코더</span>
+  <span>2026 울산 AI 해커톤 · 울산전시컨벤션센터</span>
+</div></footer>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/controls/OrbitControls.js"></script>
+<script>
+(function(){
+  function $(id){return document.getElementById(id);}
+  function css(name){return getComputedStyle(document.documentElement).getPropertyValue(name).trim();}
+  var reduce=window.matchMedia&&matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+  /* ================= 부품 데이터 ================= */
+  var PARTS=[
+    {id:1,key:'esp',name:'ESP32 보드',sub:'HW-394 · 브레드보드',color:'--c-esp',
+      where:['상자 안 뒤쪽 바닥에 브레드보드째 양면테이프로 붙여요.','USB-C 케이블은 뒷벽 구멍으로 빼서 노트북에 꽂아요.'],
+      how:['3V3 핀 → 3.3V 줄, VIN 핀 → 5V 줄, GND 핀 → GND 줄','나머지 부품은 모두 이 세 줄과 D핀에 꽂아요.'],
+      warn:['USB를 뺀 상태에서 선을 꽂아요.']},
+    {id:2,key:'rfid',name:'RFID-RC522',sub:'할 일 카드 리더',color:'--c-rfid',
+      where:['상판 오른쪽 앞, 고딩 구역 "카드 찍는 곳" 바로 밑에 붙여요.','안테나 면(코일 무늬)이 위를 보게 해요.'],
+      how:['SCK D18 · MISO D19 · SDA D21 · RST D22 · MOSI D23','3.3V → 3.3V 줄, GND → GND 줄, IRQ는 비워요.'],
+      warn:['5V에 꽂으면 안 돼요.','상판이 두꺼우면 안 읽힐 수 있어요.']},
+    {id:3,key:'hook',name:'수화기 스위치',sub:'리미트 스위치 ①',color:'--c-hook',
+      where:['왼쪽 수화기 받침 밑에 붙이고, 레버만 상판 홈으로 1cm쯤 올라오게 해요.','수화기를 올려 두면 레버가 눌려요.'],
+      how:['NO → D4, COM → GND 줄','눌림(수화기 내려놓음) = LOW, 들면 HIGH'],
+      warn:['NC 단자에 꽂으면 반대로 동작해요.']},
+    {id:4,key:'stand',name:'폰 거치대 스위치',sub:'리미트 스위치 ②',color:'--c-stand',
+      where:['오른쪽 뒤 폰 거치대 바닥판 밑에 붙여요.','폰을 올리면 바닥판이 레버를 눌러요.'],
+      how:['NO → D14, COM → GND 줄','폰 올림 = LOW'],
+      warn:['레버가 약하면 바닥판 밑에 지우개 조각을 붙여 눌림을 도와요.']},
+    {id:5,key:'stamp',name:'도장 버튼',sub:'60mm 아케이드 · 쌤',color:'--c-btn',
+      where:['상판 왼쪽 앞, 쌤 구역이에요.'],
+      how:['스위치 한쪽 → D32, 다른 쪽 → GND 줄'],
+      warn:['버튼 아래 마이크로스위치의 COM과 NO 단자를 써요.']},
+    {id:6,key:'ask',name:'질문 버튼',sub:'60mm 아케이드 · 고딩',color:'--c-btn',
+      where:['상판 오른쪽 앞, 고딩 구역 안쪽이에요.'],
+      how:['스위치 한쪽 → D33, 다른 쪽 → GND 줄'],
+      warn:['도장 버튼과 손이 부딪히지 않게 가운데에서 떨어뜨려요.']},
+    {id:7,key:'mode',name:'모드·시작 버튼',sub:'60mm 아케이드 3개',color:'--c-btn',
+      where:['상판 뒤쪽 가운데 한 줄: 쌤 모드, 시작, 학생 모드 순서예요.'],
+      how:['쌤 모드 → D25, 학생 모드 → D26, 시작 → D27','세 버튼의 다른 쪽은 모두 GND 줄'],
+      warn:['게임 중에 실수로 누르지 않게 뒤쪽에 둬요.']},
+    {id:8,key:'led',name:'네오픽셀 15칸',sub:'신뢰 게이지 · WS2812',color:'--c-led',
+      where:['상판 뒤쪽, 모드·시작 버튼 줄 바로 뒤에 받침대를 세우고 그 앞면에 붙여요.','플레이어가 버튼을 보면 바로 위에 게이지가 보이는 자리예요.','선은 받침대 왼쪽 끝 밑 구멍으로 상자 안에 넣어요.'],
+      how:['DIN ← 330Ω ← D13','5V → 5V 줄, GND → GND 줄'],
+      warn:['밝기를 코드에서 낮게 둬요.','DIN 쪽 끝에 연결해요.']},
+    {id:9,key:'df',name:'DFPlayer MINI',sub:'MP3 · microSD',color:'--c-df',
+      where:['상자 안 왼쪽 바닥, 스피커 옆이에요.','microSD 카드 슬롯이 손에 닿게 둬요.'],
+      how:['TX → D16, RX ← 1kΩ ← D17','VCC → 5V 줄, GND → GND 줄, SPK_1·SPK_2 → 스피커'],
+      warn:['microSD는 FAT32로 포맷해요.']},
+    {id:10,key:'spk',name:'스피커 3W',sub:'벨소리 · 민원 음성',color:'--c-spk',
+      where:['왼쪽 벽 안쪽에 붙이고, 벽에 지름 5cm 안쪽으로 작은 구멍을 여러 개 뚫어요.'],
+      how:['두 선 → DFPlayer SPK_1, SPK_2'],
+      warn:['스피커 선을 GND 줄에 꽂지 않아요.']}
+  ];
+  var byKey={};PARTS.forEach(function(p){byKey[p.key]=p;});
+
+  /* 배선: [부품, 부품 쪽 단자, 연결할 곳, 메모] */
+  var PINS=[
+    ['esp','3V3','3.3V 줄','보드 왼쪽 위'],['esp','VIN','5V 줄','USB 5V가 나와요. 보드 오른쪽 위'],['esp','GND','GND 줄','두 GND 모두 같은 GND예요'],
+    ['rfid','SCK','D18',''],['rfid','MISO','D19',''],['rfid','SDA (SS)','D21',''],['rfid','RST','D22',''],['rfid','MOSI','D23',''],['rfid','3.3V / GND','3.3V 줄 / GND 줄','5V 금지'],['rfid','IRQ','비움',''],
+    ['hook','NO / COM','D4 / GND 줄','수화기 내려놓으면 LOW'],
+    ['stand','NO / COM','D14 / GND 줄','폰 올리면 LOW'],
+    ['stamp','스위치 두 단자','D32 / GND 줄',''],
+    ['ask','스위치 두 단자','D33 / GND 줄',''],
+    ['mode','쌤 모드 / 학생 모드 / 시작','D25 / D26 / D27','다른 쪽은 모두 GND 줄'],
+    ['led','DIN / 5V / GND','D13 (330Ω) / 5V 줄 / GND 줄','밝기 낮게'],
+    ['df','TX / RX','D16 / D17 (1kΩ)','RX 쪽에만 저항'],
+    ['df','VCC / GND','5V 줄 / GND 줄',''],
+    ['df','SPK_1 / SPK_2','스피커 두 선',''],
+    ['spk','두 선','DFPlayer SPK_1 / SPK_2','방향 상관없음']
+  ];
+  function chipify(t){
+    return t.split(/( \/ |, )/).map(function(s){
+      if(s===' / '||s===', ')return ' ';
+      var m=s.match(/^(D\d+)(.*)$/);if(m)return '<span class="chip csig">'+m[1]+'</span>'+m[2];
+      if(/^3\.3V 줄/.test(s))return '<span class="chip c33">3.3V</span>';
+      if(/^5V 줄/.test(s))return '<span class="chip c5">5V</span>';
+      if(/^GND 줄/.test(s))return '<span class="chip cgnd">GND</span>';
+      return s;
+    }).join('');
+  }
+  $('pinrows').innerHTML=PINS.map(function(r){var p=byKey[r[0]];return '<tr data-k="'+r[0]+'"><td>'+p.id+'. '+p.name+'</td><td>'+r[1]+'</td><td>'+chipify(r[2])+'</td><td class="m">'+r[3]+'</td></tr>';}).join('');
+
+  /* ================= 선택 (목록·상세·3D·배선도 공통) ================= */
+  var sel=null,listeners=[];
+  function onSelect(fn){listeners.push(fn);}
+  function select(k){sel=(sel===k)?null:k;render();listeners.forEach(function(f){f(sel);});}
+  function render(){
+    $('pick').innerHTML='<button class="pk" type="button" data-k="" aria-pressed="'+(sel===null)+'"><span class="n" style="background:var(--dust)">∗</span>전체 보기</button>'+
+      PARTS.map(function(p){return '<button class="pk" type="button" data-k="'+p.key+'" aria-pressed="'+(sel===p.key)+'"><span class="n" style="background:var('+p.color+')">'+p.id+'</span>'+p.name+'</button>';}).join('');
+    var p=sel?byKey[sel]:null;
+    if(!p){$('detail').innerHTML='<div class="dh"><h3>부품을 골라 보세요</h3><span>목록이나 3D의 번호, 배선도의 부품을 누르면 어디에 붙이고 어떻게 연결하는지 나와요.</span></div>';return;}
+    function ul(a){return '<ul>'+a.map(function(x){return '<li>'+x+'</li>';}).join('')+'</ul>';}
+    $('detail').innerHTML='<div class="dh"><span class="n" style="background:var('+p.color+')">'+p.id+'</span><h3>'+p.name+'</h3><span>'+p.sub+'</span></div>'+
+      '<div><h4>어디에 붙이나</h4>'+ul(p.where)+'</div><div><h4>어떻게 연결하나</h4>'+ul(p.how)+'</div><div><h4>주의</h4>'+ul(p.warn)+'</div>';
+  }
+  $('pick').addEventListener('click',function(e){var b=e.target.closest('.pk');if(!b)return;var k=b.getAttribute('data-k');if(!k){sel=null;render();listeners.forEach(function(f){f(null);});}else select(k);});
+  render();
+
+  var view='3d';
+
+  /* ================= 배선도 (SVG) — 넓은 화면용 + 휴대폰 세로용 ================= */
+  (function(){
+    var L=['3V3','GND','D15','D2','D4','D16','D17','D5','D18','D19','D21','RX0','TX0','D22','D23'];
+    var R=['VIN','GND','D13','D12','D14','D27','D26','D25','D33','D32','D35','D34','VN','VP','EN'];
+    var used={D4:1,D16:1,D17:1,D18:1,D19:1,D21:1,D22:1,D23:1,D13:1,D14:1,D27:1,D26:1,D25:1,D33:1,D32:1};
+    var BOXES=[
+      ['hook','L',[['NO','D4'],['COM','GND']]],
+      ['df','L',[['TX','D16'],['RX','D17','1kΩ'],['VCC','5V'],['GND','GND'],['SPK_1 · SPK_2','스피커']]],
+      ['spk','L',[['두 선','DF SPK']]],
+      ['rfid','L',[['SCK','D18'],['MISO','D19'],['SDA','D21'],['RST','D22'],['MOSI','D23'],['3.3V','3.3V'],['GND','GND']]],
+      ['led','R',[['DIN','D13','330Ω'],['5V','5V'],['GND','GND']]],
+      ['stand','R',[['NO','D14'],['COM','GND']]],
+      ['mode','R',[['시작','D27'],['학생 모드','D26'],['쌤 모드','D25']]],
+      ['ask','R',[['질문','D33'],['다른 쪽','GND']]],
+      ['stamp','R',[['도장','D32'],['다른 쪽','GND']]]
+    ];
+    var RH=26,PITCH=33,ROW0=120;
+    function boxH(rows){return 46+rows.length*RH;}
+    function tagW(t){return Math.max(40,t.length*8+16);}
+    function tagSvg(x,y,t){
+      var cls=t==='3.3V'?'t33':(t==='5V'?'t5':(t==='GND'?'tgnd':'tnote'));var w=tagW(t);
+      return '<g class="ptag '+cls+'"><rect x="'+x+'" y="'+(y-9)+'" width="'+w+'" height="18" rx="9"/><text x="'+(x+w/2)+'" y="'+(y+4)+'">'+t+'</text></g>';
+    }
+    function draw(svg,tall){
+      var out=[],wires=[];
+      var BW=tall?200:230,BX=tall?150:455,BY=40,BH=600;
+      var HL=BX+18,HR=BX+BW-18;
+      function py(i){return ROW0+i*PITCH;}
+      function pinY(n){var i=L.indexOf(n);if(i<0)i=R.indexOf(n);return py(i);}
+      /* 보드 */
+      out.push('<g class="part sel" data-k="esp" style="cursor:pointer"><rect class="pcb" x="'+BX+'" y="'+BY+'" width="'+BW+'" height="'+BH+'" rx="14"/>');
+      out.push('<rect class="usb" x="'+(BX+BW/2-32)+'" y="'+(BY-14)+'" width="64" height="28" rx="8"/>');
+      out.push('<text class="pcbtt" x="'+(BX+BW/2)+'" y="'+(BY+38)+'" text-anchor="middle">ESP32 WROOM</text><text class="pcbs" x="'+(BX+BW/2)+'" y="'+(BY+56)+'" text-anchor="middle">HW-394 · USB-C 위 · 30핀</text>');
+      out.push('<rect class="can" x="'+(BX+BW/2-48)+'" y="'+(BY+300)+'" width="96" height="250" rx="4"/><text class="pcbs" x="'+(BX+BW/2)+'" y="'+(BY+430)+'" text-anchor="middle">ESP32 모듈</text>');
+      function pcls(n){return n==='3V3'?'p33':(n==='VIN'?'p5':(n==='GND'?'g':(used[n]?'on':'')));}
+      for(var i=0;i<15;i++){var a=L[i],b=R[i],y=py(i);
+        out.push('<circle class="hole'+(pcls(a)?' on':'')+'" cx="'+HL+'" cy="'+y+'" r="5.5"/><text class="pcbt '+pcls(a)+'" x="'+(HL+12)+'" y="'+(y+4)+'">'+a+'</text>');
+        out.push('<circle class="hole'+(pcls(b)?' on':'')+'" cx="'+HR+'" cy="'+y+'" r="5.5"/><text class="pcbt '+pcls(b)+'" x="'+(HR-12)+'" y="'+(y+4)+'" text-anchor="end">'+b+'</text>');}
+      out.push('</g>');
+      /* 부품 상자. exitRight=선이 상자 오른쪽으로 나감 */
+      function partBox(k,x,y,w,rows,exitRight,bs){
+        var p=byKey[k],col='var('+p.color+')',h=boxH(rows),s='';
+        s+='<g class="part" data-k="'+k+'" style="cursor:pointer"><rect class="box" x="'+x+'" y="'+y+'" width="'+w+'" height="'+h+'" rx="10" style="stroke:'+col+'"/>';
+        s+='<circle cx="'+(x+20)+'" cy="'+(y+22)+'" r="11" style="fill:'+col+'"/><text x="'+(x+20)+'" y="'+(y+26)+'" text-anchor="middle" style="font-family:var(--f-mono);font-size:12px;font-weight:700;fill:#10201b">'+p.id+'</text>';
+        s+='<text class="pn" x="'+(x+38)+'" y="'+(y+28)+'">'+p.name+'</text>';
+        rows.forEach(function(r,j){
+          var ry=y+46+j*RH+RH/2;
+          s+='<line class="sep" x1="'+(x+10)+'" x2="'+(x+w-10)+'" y1="'+(ry-RH/2)+'" y2="'+(ry-RH/2)+'"/>';
+          s+=exitRight?'<text class="tn" x="'+(x+14)+'" y="'+(ry+4)+'">'+r[0]+'</text>':'<text class="tn" x="'+(x+w-14)+'" y="'+(ry+4)+'" text-anchor="end">'+r[0]+'</text>';
+          var t=r[1];
+          if(/^D\d+$/.test(t)){wires.push({k:k,x:exitRight?x+w:x,y:ry,pin:t,bs:bs,exitRight:exitRight,res:r[2]||null,col:col});
+            s+='<text class="pd" x="'+(exitRight?x+w-12:x+12)+'" y="'+(ry+4)+'" text-anchor="'+(exitRight?'end':'start')+'">→ '+t+'</text>';}
+          else if(t){s+=tagSvg(exitRight?x+w-12-tagW(t):x+12,ry,t);}
+        });
+        return s+'</g>';
+      }
+      if(!tall){
+        var yL=40,yR=40;
+        BOXES.forEach(function(b){
+          var w=b[0]==='spk'?155:250;
+          if(b[1]==='L'){out.push(partBox(b[0],20,yL,w,b[2],true,'L'));yL+=boxH(b[2])+12+(b[0]==='spk'?2:0);}
+          else{out.push(partBox(b[0],870,yR,250,b[2],false,'R'));yR+=boxH(b[2])+(b[0]==='stand'?14:12);}
+        });
+      }else{
+        var top=BY+BH+40,yl=top,yr=top,CW=185;
+        BOXES.forEach(function(b){
+          if(b[1]==='L'){out.push(partBox(b[0],62,yl,CW,b[2],false,'L'));yl+=boxH(b[2])+12;}
+          else{out.push(partBox(b[0],253,yr,CW,b[2],true,'R'));yr+=boxH(b[2])+12;}
+        });
+        svg.setAttribute('viewBox','0 0 500 '+(Math.max(yl,yr)+10));
+      }
+      /* 차선: 선이 가장 적게 겹치는 순서를 골라요 */
+      function arrange(list,from,to,hx){
+        var n=list.length,xs=[];if(!n)return;for(var i=0;i<n;i++)xs.push(from+(to-from)*(n<2?.5:i/(n-1)));
+        function segs(w,lx){var y2=pinY(w.pin);return [{h:1,y:w.y,a:Math.min(w.x,lx),b:Math.max(w.x,lx)},{h:0,x:lx,a:Math.min(w.y,y2),b:Math.max(w.y,y2)},{h:1,y:y2,a:Math.min(lx,hx),b:Math.max(lx,hx)}];}
+        function cost(order){var S=order.map(function(w,i){return segs(w,xs[i]);}),c=0;
+          for(var a=0;a<n;a++)for(var b=0;b<n;b++){if(a===b)continue;S[a].forEach(function(p){if(!p.h)return;S[b].forEach(function(q){if(q.h)return;if(q.x>p.a+.5&&q.x<p.b-.5&&p.y>q.a+.5&&p.y<q.b-.5)c++;});});}
+          return c;}
+        var best=null,bc=1e9,idx=list.map(function(_,i){return i;});
+        (function perm(k){if(bc===0)return;if(k===n){var o=idx.map(function(i){return list[i];}),c=cost(o);if(c<bc){bc=c;best=o.slice();}return;}
+          for(var i=k;i<n;i++){var t=idx[k];idx[k]=idx[i];idx[i]=t;perm(k+1);t=idx[k];idx[k]=idx[i];idx[i]=t;}})(0);
+        best.forEach(function(w,i){w.lx=xs[i];});
+      }
+      var lw=wires.filter(function(w){return w.bs==='L';}),rw=wires.filter(function(w){return w.bs==='R';});
+      if(!tall){arrange(lw,HL-34,328,HL);arrange(rw,HR+34,812,HR);}
+      else{arrange(lw,52,6,HL);arrange(rw,448,494,HR);}
+      var ws=[];
+      wires.forEach(function(w){
+        var y2=pinY(w.pin),hx=w.bs==='L'?HL:HR;
+        ws.push('<path class="wire" data-k="'+w.k+'" style="stroke:'+w.col+'" d="M'+w.x+' '+w.y+' H'+w.lx.toFixed(1)+' V'+y2+' H'+hx+'"/>');
+        if(w.res){
+          /* 저항: 보드로 들어가는 마지막 가로선 위 */
+          var rx,ry;
+          if(tall){rx=w.bs==='L'?72:390;ry=y2;}else{rx=w.exitRight?w.x+8:w.x-46;ry=w.y;}
+          ws.push('<g class="res" data-k="'+w.k+'"><rect x="'+rx+'" y="'+(ry-7)+'" width="38" height="14" rx="3"/><text x="'+(rx+19)+'" y="'+(ry-11)+'" text-anchor="middle">'+w.res+'</text></g>');
+        }
+      });
+      svg.innerHTML=ws.join('')+out.join('');
+      svg.addEventListener('click',function(e){var g=e.target.closest('[data-k]');if(g)select(g.getAttribute('data-k'));});
+    }
+    var svgs=[$('wsvg'),$('wsvg2')];
+    draw(svgs[0],false);draw(svgs[1],true);
+    onSelect(function(k){
+      svgs.forEach(function(svg){
+        svg.classList.toggle('focus',!!k);
+        svg.querySelectorAll('[data-k]').forEach(function(el){var kk=el.getAttribute('data-k');el.classList.toggle('sel',kk==='esp'||(!!k&&kk===k));});
+      });
+    });
+  })();
+
+  /* ================= 치수 ================= */
+  var DEF={W:48,D:30,H:10,T:.5},dim={W:48,D:30,H:10,T:.5};
+  var LEDLEN=25;
+  function layout(){
+    var W=dim.W,D=dim.D;
+    return {
+      hook:{x:-.27*W,z:-.02*D}, stamp:{x:-.27*W,z:.3*D}, ask:{x:.1*W,z:.3*D},
+      rfid:{x:.32*W,z:.2*D}, stand:{x:.32*W,z:-.2*D}, led:{x:0,z:-.43*D},
+      mSsam:{x:-.12*W,z:-.27*D}, mStart:{x:0,z:-.27*D}, mGo:{x:.12*W,z:-.27*D},
+      esp:{x:.03*W,z:-.18*D}, df:{x:-W/2+6,z:.22*D}, spk:{x:-W/2,z:.02*D}
+    };
+  }
+  function f1(n){return (Math.round(n*10)/10).toFixed(1);}
+  function cutRows(){
+    var W=dim.W,D=dim.D,H=dim.H,T=dim.T,Ly=layout();
+    function pos(o){return '가로 '+f1(o.x+W/2)+' · 세로 '+f1(D/2-o.z);}
+    var led=Math.min(LEDLEN,W-4);
+    var rows=[
+      ['도장 버튼 구멍',pos(Ly.stamp),'버튼 몸통 + 1mm','쌤 구역 왼쪽 앞'],
+      ['질문 버튼 구멍',pos(Ly.ask),'버튼 몸통 + 1mm','고딩 구역'],
+      ['쌤 모드 버튼 구멍',pos(Ly.mSsam),'버튼 몸통 + 1mm','뒤쪽 줄'],
+      ['시작 버튼 구멍',pos(Ly.mStart),'버튼 몸통 + 1mm','뒤쪽 줄 가운데'],
+      ['학생 모드 버튼 구멍',pos(Ly.mGo),'버튼 몸통 + 1mm','뒤쪽 줄'],
+      ['수화기 스위치 레버 홈',pos({x:Ly.hook.x+4,z:Ly.hook.z}),'1 × 2 cm','수화기 받침 오른쪽 끝 아래'],
+      ['카드 찍는 곳 표시',pos(Ly.rfid),'7 × 5 cm 네모','구멍 없이 표시만. 안 읽히면 뚫기'],
+      ['폰 거치대 자리',pos(Ly.stand),'9 × 7 cm','바닥판 밑 스위치 레버 홈 1 × 2 cm. LED 받침대와 겹치지 않게'],
+      ['LED 스트립 받침대',pos(Ly.led)+' (가운데)',f1(led+2)+' × 1.4 × 높이 1.6 cm','모드·시작 버튼 줄 바로 뒤. 앞면에 스트립을 붙여 플레이어 쪽을 보게'],
+      ['LED 선 구멍',pos({x:-led/2-.5,z:Ly.led.z}),'지름 0.8 cm','받침대 왼쪽 끝 밑, 선을 상자 안으로'],
+      ['스피커 소리 구멍','왼쪽 벽 · 앞에서 '+f1(D/2-Ly.spk.z)+' · 아래에서 '+f1(H/2),'지름 5cm 안 작은 구멍','송곳으로 여러 개'],
+      ['USB 케이블 구멍','뒷벽 · 왼쪽에서 '+f1(Ly.esp.x+W/2)+' · 바닥에서 1','2 × 1.5 cm','노트북 쪽으로'],
+      ['상판','—',f1(W)+' × '+f1(D)+' cm','두께 '+f1(T)+'cm, 뚜껑처럼 열리게 하면 배선이 편해요']
+    ];
+    $('cutrows').innerHTML=rows.map(function(r){return '<tr><td>'+r[0]+'</td><td class="num">'+r[1]+'</td><td class="num">'+r[2]+'</td><td class="m">'+r[3]+'</td></tr>';}).join('');
+  }
+  function readDims(){
+    var v={W:+$('dW').value,D:+$('dD').value,H:+$('dH').value,T:+$('dT').value},err='';
+    if(!(v.W>=36&&v.W<=80))err='가로는 36~80cm 사이로 넣어 주세요.';
+    else if(!(v.D>=24&&v.D<=50))err='세로는 24~50cm 사이로 넣어 주세요.';
+    else if(!(v.H>=6&&v.H<=20))err='높이는 6~20cm 사이로 넣어 주세요.';
+    else if(!(v.T>=.3&&v.T<=1))err='판 두께는 0.3~1cm 사이로 넣어 주세요.';
+    if(err){$('dOut').innerHTML='<span class="err">'+err+'</span>';return false;}
+    dim=v;
+    $('dOut').innerHTML='상판 <b>'+f1(v.W)+' × '+f1(v.D)+'cm</b> · 안쪽 높이 <b>'+f1(v.H-2*v.T)+'cm</b>'+(v.H-2*v.T<6?' <span class="err">· 버튼 스위치 높이가 약 4~5cm라 빠듯해요</span>':'')+(v.W<42?' <span class="err">· 가로가 좁아 부품이 붙을 수 있어요</span>':'');
+    cutRows();return true;
+  }
+  readDims();
+
+  /* ================= 3D ================= */
+  (function(){
+    var stage=$('stage');
+    if(!window.THREE||!THREE.OrbitControls){stage.insertAdjacentHTML('beforeend','<div class="fail">3D 라이브러리를 불러오지 못했어요. 인터넷 연결을 확인하고 새로고침해 주세요. 아래 표와 배선도는 그대로 볼 수 있어요.</div>');return;}
+    var renderer;
+    try{renderer=new THREE.WebGLRenderer({antialias:true});}catch(e){stage.insertAdjacentHTML('beforeend','<div class="fail">이 기기에서는 3D를 그릴 수 없어요. 아래 표와 배선도를 봐 주세요.</div>');return;}
+    renderer.setPixelRatio(Math.min(window.devicePixelRatio||1,2));
+    renderer.setClearColor(0x0b1613);
+    stage.insertBefore(renderer.domElement,stage.firstChild);
+    var scene=new THREE.Scene();
+    scene.fog=new THREE.Fog(0x0b1613,140,260);
+    var cam=new THREE.PerspectiveCamera(38,1,.5,800);
+    var ctl=new THREE.OrbitControls(cam,renderer.domElement);
+    ctl.enableDamping=true;ctl.dampingFactor=.08;ctl.maxPolarAngle=Math.PI*.49;ctl.minDistance=18;ctl.maxDistance=200;
+    scene.add(new THREE.HemisphereLight(0xffffff,0x334a42,.85));
+    var sun=new THREE.DirectionalLight(0xffffff,.75);sun.position.set(40,80,50);scene.add(sun);
+    var fill=new THREE.DirectionalLight(0x9fd0ff,.25);fill.position.set(-50,30,-30);scene.add(fill);
+    var grid=new THREE.GridHelper(200,40,0x2a433b,0x1b322b);scene.add(grid);
+
+    var root=new THREE.Group();scene.add(root);
+    var partMeshes={},anchors={},ledMeshes=[],topMat=null,hookGroup=null,phoneMesh=null,wireMeshes=[];
+    var state={top:false,hook:false,phone:true,num:true,led:7};
+
+    function M(color,opt){opt=opt||{};return new THREE.MeshStandardMaterial({color:color,roughness:opt.r!==undefined?opt.r:.75,metalness:opt.m||0,emissive:opt.e||0x000000,transparent:true,opacity:1});}
+    function add(k,mesh){root.add(mesh);if(k){(partMeshes[k]=partMeshes[k]||[]).push(mesh);}return mesh;}
+    function box(k,w,h,d,mat,x,y,z){var m=new THREE.Mesh(new THREE.BoxGeometry(w,h,d),mat);m.position.set(x,y,z);return add(k,m);}
+    function cyl(k,r1,r2,h,mat,x,y,z,seg){var m=new THREE.Mesh(new THREE.CylinderGeometry(r1,r2,h,seg||28),mat);m.position.set(x,y,z);return add(k,m);}
+    function edges(mesh,color){var e=new THREE.LineSegments(new THREE.EdgesGeometry(mesh.geometry),new THREE.LineBasicMaterial({color:color||0x2a3b35,transparent:true,opacity:.9}));mesh.add(e);return e;}
+
+    function topTexture(W,D){
+      var s=24,cv=document.createElement('canvas');cv.width=Math.round(W*s);cv.height=Math.round(D*s);
+      var c=cv.getContext('2d'),Ly=layout();
+      function px(x){return (x+W/2)*s;} function pz(z){return (z+D/2)*s;}
+      c.fillStyle='#ebe7da';c.fillRect(0,0,cv.width,cv.height);
+      c.fillStyle='rgba(244,198,78,.16)';c.fillRect(0,0,px(-.02*W),cv.height);
+      c.fillStyle='rgba(95,200,240,.16)';c.fillRect(px(.02*W),0,cv.width,cv.height);
+      c.setLineDash([12,10]);c.strokeStyle='#8a8574';c.lineWidth=3;c.beginPath();c.moveTo(px(0),pz(-.2*D));c.lineTo(px(0),cv.height);c.stroke();c.setLineDash([]);
+      c.font='72px "Black Han Sans", sans-serif';c.textAlign='center';c.textBaseline='middle';
+      c.fillStyle='#b8902a';c.fillText('쌤',px(-.12*W),pz(.12*D));
+      c.fillStyle='#2f8fb4';c.fillText('고딩',px(.14*W),pz(.06*D));
+      c.strokeStyle='#2f8fb4';c.lineWidth=4;c.setLineDash([10,8]);c.strokeRect(px(Ly.rfid.x)-3.5*s,pz(Ly.rfid.z)-2.5*s,7*s,5*s);c.setLineDash([]);
+      c.font='30px "IBM Plex Sans KR", sans-serif';c.fillStyle='#2f8fb4';c.fillText('카드 찍는 곳',px(Ly.rfid.x),pz(Ly.rfid.z));
+      c.font='22px "IBM Plex Sans KR", sans-serif';c.fillStyle='#6b6553';
+      [['도장',Ly.stamp],['질문',Ly.ask],['쌤 모드',Ly.mSsam],['시작',Ly.mStart],['학생 모드',Ly.mGo]].forEach(function(a){c.fillText(a[0],px(a[1].x),pz(a[1].z)+4.3*s);});
+      var t=new THREE.CanvasTexture(cv);t.anisotropy=4;return t;
+    }
+    function screenTexture(){
+      var cv=document.createElement('canvas');cv.width=640;cv.height=400;var c=cv.getContext('2d');
+      c.fillStyle='#0f1d19';c.fillRect(0,0,640,400);
+      c.textAlign='center';c.textBaseline='middle';
+      c.font='96px "Black Han Sans", sans-serif';c.fillStyle='#f4c64e';c.fillText('쌤',190,150);c.fillStyle='#5fc8f0';c.fillText('고딩',450,150);
+      c.font='44px "Black Han Sans", sans-serif';c.fillStyle='#eef3ea';c.fillText('VS',320,150);
+      c.font='30px "IBM Plex Sans KR", sans-serif';c.fillStyle='#9fb3a9';c.fillText('모드를 고르고 시작 버튼을 누르세요',320,270);
+      for(var i=0;i<15;i++){c.fillStyle=i<7?'#f4a43a':'#22352f';c.beginPath();c.arc(110+i*30,340,10,0,7);c.fill();}
+      return new THREE.CanvasTexture(cv);
+    }
+
+    function arcade(k,color,x,z,H,T){
+      var g=new THREE.Group();g.position.set(x,H,z);
+      var ring=new THREE.Mesh(new THREE.CylinderGeometry(3.1,3.1,.5,32),M(0x1d2522,{r:.5}));ring.position.y=.25;g.add(ring);
+      var dome=new THREE.Mesh(new THREE.SphereGeometry(2.6,32,12,0,Math.PI*2,0,Math.PI/2),M(color,{r:.35}));dome.scale.y=.5;dome.position.y=.5;g.add(dome);
+      var body=new THREE.Mesh(new THREE.CylinderGeometry(1.4,1.4,3.6,20),M(0x2b3330));body.position.y=-1.8-T;g.add(body);
+      var sw=new THREE.Mesh(new THREE.BoxGeometry(2,1.2,1.4),M(0x222a27));sw.position.y=-4.1-T;g.add(sw);
+      root.add(g);[ring,dome,body,sw].forEach(function(m){(partMeshes[k]=partMeshes[k]||[]).push(m);});
+      return g;
+    }
+    function limitSwitch(k,x,y,z){
+      var b=box(k,2,1,1.1,M(0x222a27),x,y,z);
+      var lev=box(k,2.4,.12,.6,M(0xc7cfcb,{m:.6,r:.3}),x+.3,y+.75,z);lev.rotation.z=.18;
+      return b;
+    }
+
+    function build(){
+      while(root.children.length){var c=root.children.pop();c.traverse(function(o){if(o.geometry)o.geometry.dispose();if(o.material){(Array.isArray(o.material)?o.material:[o.material]).forEach(function(m){if(m.map)m.map.dispose();m.dispose();});}});}
+      partMeshes={};anchors={};ledMeshes=[];wireMeshes=[];
+      var W=dim.W,D=dim.D,H=dim.H,T=dim.T,Ly=layout();
+      /* 상자 */
+      var foam=M(0xe3dfd2,{r:.9});
+      var walls=[box(null,W,T,D,foam,0,T/2,0),box(null,W,H-2*T,T,foam,0,H/2,D/2-T/2),box(null,W,H-2*T,T,foam,0,H/2,-D/2+T/2),
+        box(null,T,H-2*T,D-2*T,foam,-W/2+T/2,H/2,0),box(null,T,H-2*T,D-2*T,foam,W/2-T/2,H/2,0)];
+      walls.forEach(function(w){edges(w,0x8a8574);});
+      topMat=M(0xffffff,{r:.85});topMat.map=topTexture(W,D);
+      var side=M(0xe3dfd2,{r:.9});
+      var top=new THREE.Mesh(new THREE.BoxGeometry(W,T,D),[side,side,topMat,side,side,side]);top.position.set(0,H-T/2,0);root.add(top);edges(top,0x8a8574);
+      top.userData.isTop=true;
+      /* ESP32 + 브레드보드 */
+      var e=Ly.esp;
+      box('esp',16.5,.9,5.5,M(0xf2f2ee,{r:.6}),e.x,T+.45,e.z);
+      box('esp',5.2,.25,2.8,M(0x1d3a2d),e.x,T+1.2,e.z);
+      box('esp',1.8,.35,1.6,M(0xb9c2be,{m:.6,r:.35}),e.x+.8,T+1.45,e.z);
+      var cable=new THREE.Mesh(new THREE.CylinderGeometry(.22,.22,1,10),M(0x222222));
+      var cA=new THREE.Vector3(e.x-2.4,T+1.3,e.z),cB=new THREE.Vector3(e.x-2.4,T+1.3,-D/2-14);
+      cable.scale.y=cA.distanceTo(cB);cable.position.copy(cA).add(cB).multiplyScalar(.5);cable.rotation.x=Math.PI/2;add('esp',cable);
+      anchors.esp=new THREE.Vector3(e.x,T+1.6,e.z);
+      /* RFID */
+      var r=Ly.rfid;box('rfid',6,.16,4,M(0x1f6f4a),r.x,H-T-.3,r.z);
+      var coil=new THREE.Mesh(new THREE.RingGeometry(1.2,1.6,32),M(0xd9b45a,{m:.5,r:.4}));coil.rotation.x=-Math.PI/2;coil.position.set(r.x-.8,H-T-.2,r.z);add('rfid',coil);
+      anchors.rfid=new THREE.Vector3(r.x,H+.4,r.z);
+      /* 수화기 받침 + 스위치 */
+      var h=Ly.hook;
+      box('hook',16,1.2,5,M(0x3a4642,{r:.6}),h.x,H+.6,h.z);
+      box('hook',1.2,1.6,5,M(0x3a4642,{r:.6}),h.x-7.4,H+1.6,h.z);box('hook',1.2,1.6,5,M(0x3a4642,{r:.6}),h.x+7.4,H+1.6,h.z);
+      limitSwitch('hook',h.x+4,H-T-.6,h.z);
+      box('hook',.3,1.4,.6,M(0xc7cfcb,{m:.6,r:.3}),h.x+4,H+.4,h.z);
+      hookGroup=new THREE.Group();
+      var hm=M(0xf2efe6,{r:.45});
+      var grip=new THREE.Mesh(new THREE.CylinderGeometry(.95,.95,12,20),hm);grip.rotation.z=Math.PI/2;hookGroup.add(grip);
+      var c1=new THREE.Mesh(new THREE.BoxGeometry(3,2,3.4),hm);c1.position.set(-6.3,-.6,0);hookGroup.add(c1);
+      var c2=c1.clone();c2.position.x=6.3;hookGroup.add(c2);
+      hookGroup.userData.base=new THREE.Vector3(h.x,H+3.2,h.z);hookGroup.position.copy(hookGroup.userData.base);root.add(hookGroup);
+      [grip,c1,c2].forEach(function(m){partMeshes.hook.push(m);});
+      anchors.hook=new THREE.Vector3(h.x+4,H+2,h.z+3);
+      /* 폰 거치대 */
+      var st=Ly.stand;
+      box('stand',9,.6,7,M(0x3a4642,{r:.6}),st.x,H+.3,st.z);
+      var back=box('stand',9,8,.5,M(0x3a4642,{r:.6}),st.x,H+4,st.z-3.2);back.rotation.x=-.32;
+      limitSwitch('stand',st.x,H-T-.6,st.z);
+      phoneMesh=new THREE.Mesh(new THREE.BoxGeometry(7.2,14.6,.8),M(0x12161a,{r:.3,m:.2}));
+      phoneMesh.position.set(st.x,H+7.6,st.z-1.6);phoneMesh.rotation.x=-.32;root.add(phoneMesh);partMeshes.stand.push(phoneMesh);
+      anchors.stand=new THREE.Vector3(st.x,H+1,st.z+3);
+      /* 버튼 */
+      var ss=0xf4c64e,bb=0x5fc8f0,ww=0xeef3ea;
+      arcade('stamp',ss,Ly.stamp.x,Ly.stamp.z,H,T);anchors.stamp=new THREE.Vector3(Ly.stamp.x,H+2.2,Ly.stamp.z);
+      arcade('ask',bb,Ly.ask.x,Ly.ask.z,H,T);anchors.ask=new THREE.Vector3(Ly.ask.x,H+2.2,Ly.ask.z);
+      arcade('mode',ss,Ly.mSsam.x,Ly.mSsam.z,H,T);arcade('mode',ww,Ly.mStart.x,Ly.mStart.z,H,T);arcade('mode',bb,Ly.mGo.x,Ly.mGo.z,H,T);
+      anchors.mode=new THREE.Vector3(Ly.mStart.x,H+2.2,Ly.mStart.z);
+      /* LED 스트립: 모드·시작 버튼 줄 바로 뒤, 상판 위 받침대 앞면 */
+      var len=Math.min(LEDLEN,W-4),lz=Ly.led.z;
+      var riser=box('led',len+2,1.6,1.4,M(0x3a4642,{r:.6}),0,H+.8,lz);edges(riser,0x22302b);
+      box('led',len+1,1,.2,M(0xf2f2ee,{r:.5}),0,H+.85,lz+.8);
+      for(var i=0;i<15;i++){var lm=new THREE.MeshStandardMaterial({color:0x22352f,emissive:0x000000,roughness:.4});
+        var l=new THREE.Mesh(new THREE.BoxGeometry(.6,.6,.3),lm);l.position.set(-len/2+len*(i+.5)/15,H+.85,lz+1);add('led',l);ledMeshes.push(l);}
+      anchors.led=new THREE.Vector3(len*.32,H+2.6,lz+.6);
+      /* DFPlayer */
+      var d=Ly.df;box('df',2.1,.8,2.1,M(0x2a3f7a),d.x,T+.4,d.z);box('df',1.1,.12,1.2,M(0xd0d0d0),d.x,T+.86,d.z);
+      anchors.df=new THREE.Vector3(d.x,T+1.4,d.z);
+      /* 스피커 + 소리 구멍 */
+      var sp=cyl('spk',2.3,2.3,1.4,M(0x1a1d1c,{r:.5}),-W/2+T+.75,H/2,Ly.spk.z);sp.rotation.z=Math.PI/2;
+      for(var a=0;a<3;a++){for(var b=0;b<6*a||(a===0&&b<1);b++){var ang=b/(6*a||1)*Math.PI*2,rr=a*.85;
+        var hole=new THREE.Mesh(new THREE.CircleGeometry(.22,12),new THREE.MeshBasicMaterial({color:0x1a1d1c,side:THREE.DoubleSide,transparent:true}));
+        hole.position.set(-W/2-.02,H/2+Math.sin(ang)*rr,Ly.spk.z+Math.cos(ang)*rr);hole.rotation.y=-Math.PI/2;add('spk',hole);}}
+      anchors.spk=new THREE.Vector3(-W/2-.4,H*.5,Ly.spk.z);
+      /* 노트북 (참고용) */
+      var lap=new THREE.Group();lap.position.set(0,0,-D/2-18);
+      var base=new THREE.Mesh(new THREE.BoxGeometry(34,1.2,23),M(0x2b3230,{r:.5,m:.3}));base.position.y=.6;lap.add(base);
+      var scr=new THREE.Mesh(new THREE.BoxGeometry(34,22,.7),[M(0x2b3230),M(0x2b3230),M(0x2b3230),M(0x2b3230),new THREE.MeshBasicMaterial({map:screenTexture()}),M(0x2b3230)]);
+      scr.position.set(0,11.8,-11.2);scr.rotation.x=-.18;lap.add(scr);root.add(lap);
+      /* 3D 배선 */
+      var pal={rfid:'--c-rfid',hook:'--c-hook',stand:'--c-stand',stamp:'--c-btn',ask:'--c-btn',mode:'--c-btn',led:'--c-led',df:'--c-df',spk:'--c-spk'};
+      Object.keys(pal).forEach(function(k){
+        var A=anchors.esp.clone(),B=(k==='spk')?anchors.df.clone():anchors[k].clone();
+        if(k==='spk')B=anchors.df.clone();
+        var end=k==='spk'?new THREE.Vector3(-W/2+T+1.5,H/2,Ly.spk.z):(k==='led'?new THREE.Vector3(-len/2-.5,H-T-1.2,lz):new THREE.Vector3(anchors[k].x,Math.min(anchors[k].y,H-T-1.2),anchors[k].z));
+        var start=k==='spk'?anchors.df.clone():A;
+        var pts=[start,new THREE.Vector3(start.x,T+1.6,start.z),new THREE.Vector3((start.x+end.x)/2,T+1.4,(start.z+end.z)/2),new THREE.Vector3(end.x,T+1.6,end.z),end];
+        var curve=new THREE.CatmullRomCurve3(pts);
+        var mat=new THREE.MeshStandardMaterial({color:new THREE.Color(css(pal[k])),emissive:new THREE.Color(css(pal[k])),emissiveIntensity:.25,transparent:true,opacity:.9});
+        var tube=new THREE.Mesh(new THREE.TubeGeometry(curve,40,.13,6,false),mat);add(k,tube);
+      });
+      applyState();applySel(sel);buildPins();
+    }
+
+    function applyState(){
+      if(topMat){var mats=[];root.children.forEach(function(o){if(o.userData&&o.userData.isTop)mats=o.material;});
+        mats.forEach(function(m){m.opacity=state.top?.18:1;m.depthWrite=!state.top;});}
+      if(hookGroup){var b=hookGroup.userData.base;hookGroup.userData.target=state.hook?1:0;}
+      if(phoneMesh)phoneMesh.visible=state.phone;
+      ledMeshes.forEach(function(m,i){
+        var on=i<state.led,c=state.led<=4?0xef5b4c:(state.led<=9?0xf4a43a:0x5fd68a);
+        m.material.color.setHex(on?c:0x22352f);m.material.emissive.setHex(on?c:0x000000);m.material.emissiveIntensity=on?1.1:0;
+      });
+      $('pins').hidden=!state.num;
+    }
+    function applySel(k){
+      Object.keys(partMeshes).forEach(function(key){
+        partMeshes[key].forEach(function(m){var mats=Array.isArray(m.material)?m.material:[m.material];mats.forEach(function(mt){mt.opacity=(!k||key===k||(k&&key==='esp'))?1:.12;mt.depthWrite=mt.opacity>.5;});});
+      });
+      document.querySelectorAll('.pin').forEach(function(p){p.classList.toggle('sel',p.getAttribute('data-k')===k);p.classList.toggle('dim',!!k&&p.getAttribute('data-k')!==k);});
+      if(state.top)applyState();
+    }
+    onSelect(function(k){applySel(k);});
+
+    function buildPins(){
+      $('pins').innerHTML=PARTS.map(function(p){return '<button class="pin" type="button" data-k="'+p.key+'" aria-label="'+p.id+'번 '+p.name+'" style="background:var('+p.color+')">'+p.id+'</button>';}).join('');
+      document.querySelectorAll('.pin').forEach(function(b){b.onclick=function(){select(b.getAttribute('data-k'));};});
+      applySel(sel);
+    }
+    var v3=new THREE.Vector3();
+    function placePins(){
+      if(!state.num)return;var w=stage.clientWidth,h=stage.clientHeight;
+      document.querySelectorAll('.pin').forEach(function(p){var a=anchors[p.getAttribute('data-k')];if(!a)return;
+        v3.copy(a).project(cam);var x=(v3.x*.5+.5)*w,y=(-v3.y*.5+.5)*h;
+        p.style.transform='translate('+(x-13)+'px,'+(y-13)+'px)';p.style.visibility=(v3.z<1&&x>-20&&x<w+20&&y>-20&&y<h+20)?'visible':'hidden';});
+    }
+
+    /* 시점 */
+    var goal=null;
+    function viewPos(name){
+      var W=dim.W,D=dim.D,H=dim.H;
+      if(name==='front')return {p:new THREE.Vector3(0,H*2.6,D*2.4+20),t:new THREE.Vector3(0,H*.7,0)};
+      if(name==='top')return {p:new THREE.Vector3(0,Math.max(W,D)*1.9,.01+6),t:new THREE.Vector3(0,H,0)};
+      return {p:new THREE.Vector3(-W*.95,H*4.4+12,D*1.7+14),t:new THREE.Vector3(0,H*.8,-3)};
+    }
+    function setView(name,instant){
+      document.querySelectorAll('[data-view]').forEach(function(b){b.setAttribute('aria-pressed',b.getAttribute('data-view')===name);});
+      var v=viewPos(name),k=Math.max(1,1.3/Math.max(cam.aspect,.3));if(k>1){v.p.sub(v.t).multiplyScalar(k).add(v.t);}if(instant||reduce){cam.position.copy(v.p);ctl.target.copy(v.t);goal=null;}else goal=v;
+    }
+    document.querySelectorAll('[data-view]').forEach(function(b){b.onclick=function(){setView(b.getAttribute('data-view'));};});
+
+    function tog(id,key){$(id).onclick=function(){state[key]=!state[key];this.setAttribute('aria-pressed',state[key]);applyState();applySel(sel);};}
+    tog('tTop','top');tog('tHook','hook');tog('tPhone','phone');tog('tNum','num');
+    $('ledv').oninput=function(){state.led=+this.value;$('ledo').textContent=state.led+' / 15';applyState();};
+
+    function onDims(){if(readDims()){build();}}
+    ['dW','dD','dH','dT'].forEach(function(id){$(id).addEventListener('change',onDims);$(id).addEventListener('input',function(){clearTimeout(window.__dt);window.__dt=setTimeout(onDims,350);});});
+    $('dReset').onclick=function(){$('dW').value=DEF.W;$('dD').value=DEF.D;$('dH').value=DEF.H;$('dT').value=DEF.T;onDims();setView('iso',true);};
+
+    function resize(){var w=stage.clientWidth,h=stage.clientHeight;if(!w||!h)return;renderer.setSize(w,h,false);cam.aspect=w/h;cam.updateProjectionMatrix();}
+    window.__resize3d=resize;window.addEventListener('resize',resize);
+    resize();build();setView('iso',true);
+    if(document.fonts&&document.fonts.ready)document.fonts.ready.then(function(){build();});
+
+    var hookT=0;
+    (function loop(){
+      requestAnimationFrame(loop);
+      if(view!=='3d'||document.hidden)return;
+      if(goal){cam.position.lerp(goal.p,.12);ctl.target.lerp(goal.t,.12);if(cam.position.distanceTo(goal.p)<.2)goal=null;}
+      if(hookGroup){var tg=hookGroup.userData.target||0;hookT+=(tg-hookT)*(reduce?1:.12);var b=hookGroup.userData.base;
+        hookGroup.position.set(b.x+hookT*2,b.y+hookT*7,b.z+hookT*4);hookGroup.rotation.set(hookT*-.5,0,hookT*.35);}
+      ctl.update();renderer.render(scene,cam);placePins();
+    })();
+  })();
+})();
+
+/* ===== 탭: 3D 부착도 / 배선도 / 준비물 ===== */
+(function(){
+  var T={'3d':['tab3d','p3d',''],'w':['tabw','pw','#wiring'],'p':['tabp','pp','#parts']},keys=['3d','w','p'];
+  function g(id){return document.getElementById(id);}
+  function set(k,focus){
+    keys.forEach(function(x){var on=x===k;g(T[x][0]).setAttribute('aria-selected',on);g(T[x][0]).tabIndex=on?0:-1;g(T[x][1]).hidden=!on;});
+    g('pickpanel').hidden=k==='p';
+    if(k==='3d'&&window.__resize3d)requestAnimationFrame(window.__resize3d);
+    try{history.replaceState(null,'',location.pathname+T[k][2]);}catch(e){}
+    if(focus)g(T[k][0]).focus();
+  }
+  keys.forEach(function(k,i){var b=g(T[k][0]);b.onclick=function(){set(k);};
+    b.addEventListener('keydown',function(e){var d=e.key==='ArrowRight'?1:e.key==='ArrowLeft'?-1:0;if(d){e.preventDefault();set(keys[(i+d+3)%3],true);}});});
+  set(location.hash==='#wiring'?'w':location.hash==='#parts'?'p':'3d');
+})();
+</script>
+</body>
+</html>
