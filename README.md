@@ -25,11 +25,14 @@ team418-hackathon/
 │  ├─ characters/       ← 캐릭터 4명 표정 5종 + 동작 3종 (초록 배경, 16:9)
 │  └─ backgrounds/      ← 배경 5종 (사람 없음)
 ├─ site/                ← 지금 배포된 소개 사이트 (index.html, build.html, 소개 영상)
-├─ server/              ← AI NPC 서버 (키를 숨기는 곳) — 만들 예정
+├─ server/              ← AI NPC 서버 (키를 숨기는 곳) — AI 1 담당
+├─ scenes/              ← NPC 성격 글 · 시험 대사 (코딩 없이 글만) — AI 3 담당
 ├─ tools/
 │  ├─ scripts/          ← cutout.py (그림 자르기·배경 지우기), check_endings.js (엔딩 도달 확인)
 │  └─ intro-video/      ← 15초 소개 영상 원본 (코드로 만든 영상)
 └─ docs/
+   ├─ roles/                ← ⭐ AI 1 · 2 · 3 역할별 할 일 · 약속(규격) · 총괄 체크리스트
+   ├─ pitch/                ← 발표 슬라이드 PDF · 시연 대본 (AI 3 담당, 만들 예정)
    ├─ history.md            ← 프로젝트 흐름 · 결정 기록 · 남은 일  ⭐ 처음 오면 여기부터
    ├─ conversation-notes.md ← Claude 와 나눈 대화 정리 (시간 순)
    ├─ vn-design.md          ← 미연시 설계: 맛보기(엔딩 6) + 실제 게임 확장안(엔딩 15)
@@ -53,17 +56,30 @@ team418-hackathon/
 
 ---
 
+## 역할 (AI 1 · 2 · 3)
+
+각자 **자기 AI 하나와 짝**이 돼서 역할 1개를 맡아요. 연님은 역할 1개 + **총괄**.
+👉 **[docs/roles/README.md](docs/roles/README.md) 를 먼저 보세요.**
+
+| AI | 맡는 사람 (제안) | 하는 일 | 할 일 문서 |
+|---|---|---|---|
+| AI 1 | 최호진 | AI NPC 서버 (`server/`) | [AI-1-server.md](docs/roles/AI-1-server.md) |
+| AI 2 | 이승민(연) + 총괄 | 화면 연결 (`site/`) | [AI-2-screen.md](docs/roles/AI-2-screen.md) · [lead-checklist.md](docs/roles/lead-checklist.md) |
+| AI 3 | 최하선 | 대본 · **발표 PDF(필수)** (`scenes/`, `docs/pitch/`) — 코딩 없음 | [AI-3-story-pitch.md](docs/roles/AI-3-story-pitch.md) |
+
+세 역할이 만나는 규격(서버 주소 · JSON 모양 · 성격 글 모양): [contract.md](docs/roles/contract.md)
+
 ## 처음 참여하는 방법 (팀원용)
 
 1. GitHub 가입 → 연님에게 **아이디** 알려주기 → 메일로 온 **초대 수락**
 2. [GitHub Desktop](https://desktop.github.com) 설치 → `File > Clone repository` → `team418-hackathon` 선택
-3. 내 AI(Claude, ChatGPT 등)에게 이 폴더를 열어 주고 `README.md 읽고 시작해 줘` 라고 말하기
+3. 내 AI(Claude, ChatGPT 등)에게 이 폴더를 열어 주고 `README.md 와 docs/roles/ 에서 내 역할 문서를 읽고 시작해 줘` 라고 말하기
 
 ### 같이 작업할 때 약속
 
 - **작업 시작 전 `Fetch / Pull`** 먼저 (남이 바꾼 걸 받아오기)
 - **내 담당 폴더만** 고치기 → 충돌이 거의 안 나요
-  - 서버(`server/`) · 화면(`site/`) · 대본(`scenes/`) 을 나눠 맡기
+  - 서버(`server/`) = AI 1 · 화면(`site/`) = AI 2 · 대본 · 발표(`scenes/`, `docs/pitch/`) = AI 3
 - 작게 자주 `Commit` → `Push`. 커밋 메시지는 한국어로 "무엇을 왜" 한 줄
 - 남의 파일을 고쳐야 하면 단톡에 먼저 말하기
 
@@ -93,5 +109,5 @@ team418-hackathon/
 ## 일정
 
 - 10/22 에셋 완성 · 저장소 준비
-- 10/23 미연시 데모에 에셋 연결 · AI 서버 연결 · 발표 PDF
-- 10/24~25 대회 (AI 서버가 안 되면 미리 쓴 대본으로 자동 전환)
+- 10/23 mock 서버 · 화면 연결 · NPC 성격 글 · 발표 목차 (역할별 자세한 일정: [docs/roles](docs/roles/README.md#일정-오늘-1022-밤-기준))
+- 10/24~25 대회 · 진짜 AI 연결 · **발표 PDF 제출** (AI 서버가 안 되면 미리 쓴 대본으로 자동 전환)
