@@ -1,0 +1,25 @@
+<!doctype html>
+<html lang="ko"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>효과음 미리 듣기 · TEAM 418</title>
+<style>
+:root{--bg:#10201b;--card:#183029;--line:#2c4a40;--chalk:#eef3ea;--dust:#9fb3aa;--high:#5fd68a}
+body{margin:0;background:var(--bg);color:var(--chalk);font:16px/1.6 system-ui,'Apple SD Gothic Neo','Noto Sans KR',sans-serif}
+main{max-width:860px;margin:0 auto;padding:28px 16px 60px}h1{font-size:24px;margin:0 0 4px}p{color:var(--dust);margin:0 0 18px}
+h2{font-size:15px;color:var(--dust);margin:24px 0 10px;font-weight:600}
+.g{display:grid;grid-template-columns:repeat(auto-fill,minmax(180px,1fr));gap:8px}
+button{font:inherit;text-align:left;color:var(--chalk);background:var(--card);border:1.5px solid var(--line);border-radius:12px;padding:10px 12px;cursor:pointer}
+button:hover,button:focus-visible{border-color:var(--high);outline:none}button b{display:block}button small{color:var(--dust);font-size:12.5px}
+a{color:var(--high)}
+</style></head><body><main>
+<h1>효과음 미리 듣기</h1>
+<p>모두 코드로 합성한 소리예요 (파일 없음 · 0원 · 저작권 걱정 없음). 눌러서 들어 보고 바꾸고 싶은 소리를 알려 주세요. <a href="index.html#vn">미연시로 돌아가기</a></p>
+<div id="list"></div>
+<script src="sfx.js"></script>
+<script>
+var G=[['미연시',[['select','선택지 고름','버튼을 누를 때'],['up','호감 +1~2','하트가 오를 때'],['up3','호감 +3','크게 오를 때'],['down','호감 −','서운하게 했을 때'],['flag','★ 선택 기억','뒤 장면이 바뀌는 선택'],['msg','메시지 도착','밤 10시 메신저'],['next','다음 장면','장면 넘김'],['start','루트 시작','루트 고를 때'],['typing','글자 타닥','대사 나올 때'],['click','작은 클릭','인물 소개 열기']]],
+['엔딩 · 신뢰 게이지',[['endGood','GOOD 엔딩','팡파르'],['endNormal','NORMAL 엔딩','잔잔하게'],['endBad','BAD 엔딩','아쉬운 소리'],['max','신뢰 MAX','15칸 가득'],['zero','신뢰 바닥','0칸']]],
+['미니게임 · 영상',[['stamp','결재 도장','도장 연타'],['pop','톡 튀어나옴','카드 등장'],['ok','확인 딩동','성공'],['boom','쾅 (VS)','영상 제목'],['whoosh','휙','장면 전환'],['ring','전화벨','쌤의 하루'],['tap','톡','두드리기'],['stinger','마무리 화음','영상 끝']]]];
+var h='';G.forEach(function(g){h+='<h2>'+g[0]+'</h2><div class="g">';g[1].forEach(function(x){h+='<button type="button" data-n="'+x[0]+'"><b>'+x[1]+'</b><small>'+x[2]+' · '+x[0]+'</small></button>';});h+='</div>';});
+var L=document.getElementById('list');L.innerHTML=h;
+L.addEventListener('click',function(e){var b=e.target.closest('button');if(!b)return;SFX.setMuted(false);SFX.play(b.getAttribute('data-n'));});
+</script></main></body></html>

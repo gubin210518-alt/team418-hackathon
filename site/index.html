@@ -393,6 +393,12 @@ footer .wrap{display:flex;justify-content:space-between;gap:8px 12px;flex-wrap:w
 .vx-where span{font-family:var(--f-mono);font-size:12px;color:var(--dust)}
 .vx-where b{font-size:13.5px}
 .vx-meters{display:flex;gap:6px;flex-wrap:wrap;justify-content:flex-end}
+button.vx-m{font:inherit;color:inherit;cursor:pointer}button.vx-m:hover,button.vx-m[aria-expanded="true"]{border-color:var(--c)}
+.vx-who{position:absolute;right:12px;top:56px;z-index:8;width:min(270px,calc(100% - 24px));display:flex;gap:10px;background:rgba(10,20,17,.94);border:1.5px solid var(--c);border-radius:14px;padding:10px;box-shadow:0 12px 30px rgba(0,0,0,.45);animation:vxCh .25s ease both}
+.vx-who img{width:64px;height:64px;border-radius:10px;object-fit:cover;object-position:top;background:#284038;flex:none}
+.vx-who b{display:block;color:var(--c)}.vx-who small{color:var(--dust);font-size:12px}.vx-who p{margin:4px 0 0;font-size:13px;line-height:1.45}
+.vx-sndrow{display:flex;justify-content:flex-end;margin:0 0 8px}.vbox+.vx-sndrow{margin:10px 0 0;justify-content:flex-start;gap:8px}
+.btn.sm{font-size:13px;padding:6px 12px}
 .vx-m{display:flex;align-items:center;gap:6px;background:rgba(0,0,0,.55);border:1.5px solid transparent;border-radius:999px;padding:3px 10px 3px 3px;font-size:12px;backdrop-filter:blur(4px);transition:border-color .3s}
 .vx-m img{width:24px;height:24px;border-radius:50%;object-fit:cover;object-position:top;background:#284038}
 .vx-m b{font-family:var(--f-mono);min-width:2.4em;text-align:right}
@@ -673,6 +679,7 @@ table.cmp td{width:42%}
       <div class="vbox">
         <video src="intro.mp4" poster="intro-poster.jpg" autoplay muted loop playsinline controls preload="metadata" aria-label="역지사지 시뮬레이터 15초 소개 영상. 쌤 VS 고딩 제목, 쌤의 하루, 고딩의 하루, 15칸 신뢰 게이지가 차오르는 장면, 1번 주제 소개 순서로 나와요."></video>
       </div>
+      <div class="vx-sndrow"><button class="btn ghost sm" type="button" id="vidSnd">🔊 소리 켜고 처음부터 보기</button></div>
     </div>
   </section>
 
@@ -681,6 +688,7 @@ table.cmp td{width:42%}
       <span class="tag">미연시 맛보기 · 루트 2개 · 1~2분</span>
       <h2>오늘 하루, 누구로 살아 볼래?</h2>
       <p class="lede">루트를 고르고 NPC와 대화해 보세요. <b>인물마다 호감도가 따로 쌓이고</b>, 앞에서 고른 선택이 뒤 장면을 바꿔요. 루트마다 엔딩이 3개(좋음 · 보통 · 나쁨) 있어요. 실제 게임에서는 AI가 NPC를 연기하고, 직접 입력한 말까지 판단해요.</p>
+      <div class="vx-sndrow"><a class="btn ghost sm" href="sfx.html">효과음 미리 듣기</a>&nbsp;<button class="btn ghost sm" type="button" data-sfx-toggle aria-pressed="true">🔊 소리 켜짐</button></div>
       <div class="vx" id="vx">
         <canvas class="vx-conf" id="vxConf" aria-hidden="true"></canvas>
         <div class="vx-title" id="vxTitle">
@@ -1094,6 +1102,7 @@ table.cmp td{width:42%}
 
 <div class="minig hide" id="minig" aria-hidden="true"><span>신뢰</span><span class="dots" id="minidots"></span><span id="minival">7</span></div>
 
+<script src="sfx.js"></script>
 <script>
 (function(){
   var reduce=window.matchMedia&&matchMedia('(prefers-reduced-motion: reduce)').matches;
@@ -1113,6 +1122,7 @@ table.cmp td{width:42%}
       document.body.appendChild(s);setTimeout(s.remove.bind(s),700);}
   }
   function fx(x,y,txt,color){
+    if(window.SFX)SFX.play(color==='var(--high)'?'up':color==='var(--low)'?'down':color==='var(--seal)'?'flag':color==='var(--gooding)'?'pop':'click');
     if(reduce)return;var t=document.createElement('span');t.className='fx';t.textContent=txt;t.style.left=x+'px';t.style.top=y+'px';t.style.color=color||'var(--chalk)';
     document.body.appendChild(t);setTimeout(t.remove.bind(t),950);
   }
@@ -1192,8 +1202,8 @@ table.cmp td{width:42%}
     var before=v;v=Math.max(0,Math.min(N,v+delta));draw();
     if(delta>0){flash('bump');wave(before,v);}else if(delta<0){flash('hurt');}
     if(at&&delta!==0)fx(at.x,at.y,(delta>0?'신뢰 +':'신뢰 −')+Math.abs(delta),delta>0?'var(--high)':'var(--low)');
-    if(v===N&&before<N){say('<b>신뢰 MAX!</b> 서로의 하루를 이해했어요.');banner('신뢰 MAX');confetti();}
-    else if(v===0&&before>0){say('<b>신뢰 바닥.</b> 자리를 바꿔서 다시 해 볼까요?');banner('신뢰 바닥',true);}
+    if(v===N&&before<N){if(window.SFX)SFX.play('max');say('<b>신뢰 MAX!</b> 서로의 하루를 이해했어요.');banner('신뢰 MAX');confetti();}
+    else if(v===0&&before>0){if(window.SFX)SFX.play('zero');say('<b>신뢰 바닥.</b> 자리를 바꿔서 다시 해 볼까요?');banner('신뢰 바닥',true);}
     else if(why){say(why);}
   }
   window.__trust=trust;
@@ -1325,7 +1335,7 @@ table.cmp td{width:42%}
     if(!g2.on)return;
     var r=paper.getBoundingClientRect(),x,y;
     if(e&&e.clientX){x=e.clientX-r.left;y=e.clientY-r.top;}else{x=20+Math.random()*(r.width-40);y=20+Math.random()*(r.height-40);}
-    stampAt(x,y);g2.n++;var c=$('g2count');c.textContent=g2.n;c.classList.remove('pop');void c.offsetWidth;c.classList.add('pop');
+    stampAt(x,y);if(window.SFX)SFX.play('stamp');g2.n++;var c=$('g2count');c.textContent=g2.n;c.classList.remove('pop');void c.offsetWidth;c.classList.add('pop');
     paper.classList.remove('hit');void paper.offsetWidth;paper.classList.add('hit');
     if(g2.n%10===0){fx(r.left+x,r.top+y,g2.n+'장!','var(--seal)');burst(r.left+x,r.top+y,12,['#c8352a','#f4c64e']);}
   }
@@ -1552,15 +1562,26 @@ r.setAttribute('fill',i<5?'#ef5b4c':i<10?'#f4a43a':'#5fd68a');r.setAttribute('op
   function type(s){return new Promise(function(res){
     clearInterval(timer);full=s;if(reduce){txt.textContent=s;typing=false;return res();}
     var i=0;typing=true;txt.textContent='';
-    timer=setInterval(function(){i++;txt.innerHTML=esc(s.slice(0,i))+'<span class="caret">▌</span>';if(i>=s.length){clearInterval(timer);txt.textContent=s;typing=false;res();}},24);
+    timer=setInterval(function(){i++;if(i%3===1&&s.charAt(i-1)!==' ')snd('typing');txt.innerHTML=esc(s.slice(0,i))+'<span class="caret">▌</span>';if(i>=s.length){clearInterval(timer);txt.textContent=s;typing=false;res();}},24);
     txt._skip=function(){clearInterval(timer);txt.textContent=full;typing=false;res();};
   });}
   txt.addEventListener('click',function(){if(typing&&txt._skip)txt._skip();});
   function meters(focus){
     var R=ROUTES[S.r],h='';
-    R.cast.forEach(function(n){var v=S.v[n];h+='<span class="vx-m'+(n===focus?' now':'')+'" id="vxm-'+n+'" style="--c:'+NPC[n].c+'"><img src="img/c/'+NPC[n].img+'-neutral.webp" alt="">'+NPC[n].n+'<b style="color:'+(v>0?'var(--high)':v<0?'var(--low)':'var(--dust)')+'">♥ '+(v>0?'+':'')+v+'</b></span>';});
-    $('vxMeters').innerHTML=h;
+    R.cast.forEach(function(n){var v=S.v[n];h+='<button type="button" class="vx-m'+(n===focus?' now':'')+'" id="vxm-'+n+'" data-npc="'+n+'" aria-expanded="false" title="눌러서 인물 소개" style="--c:'+NPC[n].c+'"><img src="img/c/'+NPC[n].img+'-neutral.webp" alt="">'+NPC[n].n+'<b style="color:'+(v>0?'var(--high)':v<0?'var(--low)':'var(--dust)')+'">♥ '+(v>0?'+':'')+v+'</b></button>';});
+    $('vxMeters').innerHTML=h;hideCard();
   }
+  /* 호감도 칸을 누르면 인물 소개 */
+  function hideCard(){var c=$('vxCard');if(c)c.remove();Array.prototype.forEach.call(document.querySelectorAll('.vx-m'),function(b){b.setAttribute('aria-expanded','false');});}
+  $('vxMeters').addEventListener('click',function(e){
+    var b=e.target.closest('.vx-m');if(!b)return;var k=b.getAttribute('data-npc'),open=b.getAttribute('aria-expanded')==='true';hideCard();if(open)return;
+    var N=NPC[k],v=S.v[k]||0,c=document.createElement('div');c.className='vx-who';c.id='vxCard';c.style.setProperty('--c',N.c);c.setAttribute('role','note');
+    c.innerHTML='<img src="img/c/'+N.img+'-'+(v>=2?'happy':v>=0?'neutral':v>=-1?'sad':'upset')+'.webp" alt=""><div><b>'+esc(N.n)+'</b><small>'+esc(N.age)+'</small><p>'+esc(N.who)+'</p></div>';
+    var hud=scn.querySelector('.vx-hud');c.style.top=(hud.offsetTop+hud.offsetHeight+8)+'px';scn.appendChild(c);b.setAttribute('aria-expanded','true');snd('click');
+  });
+  document.addEventListener('click',function(e){if(!e.target.closest('.vx-m')&&!e.target.closest('.vx-who'))hideCard();});
+  document.addEventListener('keydown',function(e){if(e.key==='Escape')hideCard();});
+  function snd(n){if(window.SFX)SFX.play(n);}
   function steps(){var n=ROUTES[S.r].scenes.length,h='';for(var i=0;i<n;i++)h+='<i class="'+(i<S.i?'done':i===S.i?'now':'')+'"></i>';$('vxSteps').innerHTML=h;}
 
   /* ---------- 효과 ---------- */
@@ -1570,14 +1591,14 @@ r.setAttribute('fill',i<5?'#ef5b4c':i<10?'#f4a43a':'#5fd68a');r.setAttribute('op
   function pop(html,color){var p=document.createElement('div');p.className='vx-pop';p.style.setProperty('--c',color);p.innerHTML=html;fx.appendChild(p);setTimeout(function(){p.remove();},1400);}
   function flash(cls,color){if(reduce)return;var f=document.createElement('div');f.className=cls;if(color)f.style.setProperty('--c',color);fx.appendChild(f);setTimeout(function(){f.remove();},800);}
   function shake(){if(reduce)return;scn.classList.remove('shake');void scn.offsetWidth;scn.classList.add('shake');}
-  function flag(t){var f=document.createElement('div');f.className='vx-flag';f.textContent='★ '+t;fx.appendChild(f);setTimeout(function(){f.remove();},2300);}
+  function flag(t){snd('flag');var f=document.createElement('div');f.className='vx-flag';f.textContent='★ '+t;fx.appendChild(f);setTimeout(function(){f.remove();},2300);}
   function chapter(sc){if(reduce)return Promise.resolve();var c=document.createElement('div');c.className='vx-card';c.style.setProperty('--c',ROUTES[S.r].color);
     c.innerHTML='<span>CHAPTER '+(S.i+1)+'</span><b>'+esc(sc.when)+'</b><em>'+esc(sc.where)+'</em>';scn.appendChild(c);setTimeout(function(){c.remove();},1550);return wait(1150);}
 
   /* ---------- 진행 ---------- */
   function start(r){
     S={r:r,i:0,v:{},F:{},free:0,log:[],total:0};NPC.parent.n=r==='g'?'엄마':'민준 어머니';ROUTES[r].cast.forEach(function(n){S.v[n]=0;});
-    show(stage);stage.style.setProperty('--rc',ROUTES[r].color);play();
+    show(stage);stage.style.setProperty('--rc',ROUTES[r].color);snd('start');play();
   }
   async function play(){
     busy=true;var R=ROUTES[S.r],sc=R.scenes[S.i];
@@ -1591,7 +1612,7 @@ r.setAttribute('fill',i<5?'#ef5b4c':i<10?'#f4a43a':'#5fd68a');r.setAttribute('op
     if(sc.msgs){
       var ph=document.createElement('div');ph.className='vx-phone';ph.innerHTML='<header>'+esc(sc.msgs[0][0])+'</header>';scn.appendChild(ph);
       for(var k=0;k<sc.msgs.length;k++){var d=document.createElement('div');d.className='vx-dots';d.innerHTML='<i></i><i></i><i></i>';ph.appendChild(d);await wait(650);d.remove();
-        var b=document.createElement('div');b.className='vx-bub';b.innerHTML='<small>'+esc(sc.msgs[k][0])+'</small>'+esc(sc.msgs[k][1]);ph.appendChild(b);}
+        var b=document.createElement('div');b.className='vx-bub';b.innerHTML='<small>'+esc(sc.msgs[k][0])+'</small>'+esc(sc.msgs[k][1]);ph.appendChild(b);snd('msg');}
       await wait(300);
     }
     var line=typeof sc.line==='function'?sc.line(S.F):sc.line;
@@ -1605,7 +1626,7 @@ r.setAttribute('fill',i<5?'#ef5b4c':i<10?'#f4a43a':'#5fd68a');r.setAttribute('op
     free.hidden=(sc.npc==='group'||sc.npc==='vp');
   }
   function answer(c,said){
-    if(busy)return;busy=true;chs.innerHTML='';free.hidden=true;
+    if(busy)return;busy=true;chs.innerHTML='';free.hidden=true;hideCard();snd('select');
     var sc=ROUTES[S.r].scenes[S.i],sum=0,main=0;
     Object.keys(c.d||{}).forEach(function(n){var x=c.d[n];if(!(n in S.v))return;S.v[n]+=x;sum+=x;if(n===sc.npc)main=x;});
     if(!(sc.npc in S.v))main=sum;
@@ -1616,6 +1637,7 @@ r.setAttribute('fill',i<5?'#ef5b4c':i<10?'#f4a43a':'#5fd68a');r.setAttribute('op
     if(sc.pose){var ex=main>=1?'happy':main===0?'neutral':main===-1?'sad':'upset';setChar(NPC[sc.npc].img+'-'+ex,main<0?'sad':'pop');}
     Object.keys(c.d||{}).forEach(function(n,idx){var x=c.d[n];if(!x||!(n in S.v))return;var col=NPC[n].c;
       setTimeout(function(){
+        snd(x>=3?'up3':x>0?'up':'down');
         if(x>0){pop('♥ +'+x+'<small>'+NPC[n].n+'</small>',col);burst(col,x>=3?22:12);if(x>=3)flash('vx-flash',col);}
         else{pop('♡ '+x+'<small>'+NPC[n].n+'</small>','#ef5b4c');shake();flash('vx-hurt');burst('#ef5b4c',6,'✕');}
       },idx*450);});
@@ -1626,7 +1648,7 @@ r.setAttribute('fill',i<5?'#ef5b4c':i<10?'#f4a43a':'#5fd68a');r.setAttribute('op
     txt.innerHTML='<span class="said">나('+ROUTES[S.r].me+'): '+esc(said)+'</span><span class="res '+cls+'">'+(sum>0?'▲ 호감 +'+sum:sum<0?'▼ 호감 '+sum:'– 변화 없음')+'</span> '+esc(c.why||'');
     var last=S.i>=ROUTES[S.r].scenes.length-1;
     var nb=document.createElement('button');nb.type='button';nb.className='btn '+(S.r==='s'?'ssam':'goo');nb.textContent=last?'엔딩 보기 →':'다음 장면 →';
-    nb.onclick=function(){if(last)ending();else{S.i++;play();}};
+    nb.onclick=function(){if(last)ending();else{snd('next');S.i++;play();}};
     setTimeout(function(){chs.appendChild(nb);nb.focus({preventScroll:true});busy=false;},reduce?0:400);
   }
   free.addEventListener('submit',function(e){e.preventDefault();var s=inp.value.trim();if(!s||busy)return;inp.value='';
@@ -1662,7 +1684,7 @@ r.setAttribute('fill',i<5?'#ef5b4c':i<10?'#f4a43a':'#5fd68a');r.setAttribute('op
     show(endEl);
     $('vxOther').onclick=function(){start(other);};$('vxAgain').onclick=function(){start(S.r);};$('vxToBook').onclick=openBook;
     $('vx').scrollIntoView({behavior:reduce?'auto':'smooth',block:'start'});
-    conf(bad?'rain':E.g==='NORMAL'?'soft':'party');
+    conf(bad?'rain':E.g==='NORMAL'?'soft':'party');snd(bad?'endBad':E.g==='NORMAL'?'endNormal':'endGood');
   }
   function openBook(){
     var a=have(),h='<header><b>엔딩 도감</b><span class="small">'+a.length+' / '+ALL.length+' 모음 · 이 브라우저에만 저장돼요</span><button class="btn ghost" type="button" id="vxBookBack">처음으로</button></header><div class="vx-grid">';
@@ -1688,6 +1710,11 @@ r.setAttribute('fill',i<5?'#ef5b4c':i<10?'#f4a43a':'#5fd68a');r.setAttribute('op
   /* ---------- 시작 화면 · 인물 설정 ---------- */
   Array.prototype.forEach.call(document.querySelectorAll('.vx-route[data-route]'),function(b){b.onclick=function(){start(b.getAttribute('data-route'));};});
   $('vxBookBtn').onclick=openBook;cnt();
+  Array.prototype.forEach.call(document.querySelectorAll('[data-sfx-toggle]'),function(b){if(!window.SFX){b.hidden=true;return;}SFX.paint(b);b.onclick=function(){SFX.setMuted(!SFX.muted());if(!SFX.muted())SFX.play('ok');};});
+  (function(){var v=document.querySelector('#video video'),b=$('vidSnd');if(!v||!b)return;
+    function paint(){b.textContent=v.muted?'🔊 소리 켜고 처음부터 보기':'🔇 소리 끄기';}
+    b.onclick=function(){if(v.muted){v.muted=false;v.currentTime=0;var p=v.play();if(p&&p.catch)p.catch(function(){});}else{v.muted=true;}paint();};
+    v.addEventListener('volumechange',paint);paint();})();
   // 미리 불러오기
   setTimeout(function(){['ssam','minjun','parent','friend'].forEach(function(c){['call','talk','thanks','happy','neutral','sad','upset'].forEach(function(e){new Image().src='img/c/'+c+'-'+e+'.webp';});});
     ['office-am','office-pm','hall','class-pm','night'].forEach(function(b){new Image().src='img/bg/'+b+'.webp';});},1500);
@@ -1696,7 +1723,7 @@ r.setAttribute('fill',i<5?'#ef5b4c':i<10?'#f4a43a':'#5fd68a');r.setAttribute('op
   ['ssam','minjun','parent','friend','vp','group'].forEach(function(k){var N=NPC[k],d=document.createElement('article');d.className='pp';d.style.setProperty('--c',N.c);
     var art=N.msg?'<span class="msg">'+(k==='vp'?'✉':'단톡')+'</span><em>실제 게임에서 등장 · '+N.msg+'</em>':'<img src="img/c/'+N.img+'-neutral.webp" alt="'+N.n+'" loading="lazy"><em>눌러서 표정 바꾸기</em>';
     d.innerHTML='<div class="pp-art" style="--bg:url(img/bg/'+(N.bg||'office-am')+'.webp)">'+art+'</div><div class="pp-body"><h3>'+N.n+'<small>'+N.age+'</small></h3>'+
-      '<dl><dt>성격</dt><dd>'+esc(N.who)+'</dd><dt>숨은 사정</dt><dd>'+esc(N.secret)+'</dd><dt class="like">좋아하는 말</dt><dd>'+esc(N.like)+'</dd><dt class="hate">싫어하는 말</dt><dd>'+esc(N.hate)+'</dd></dl></div>';
+      '<dl><dt>성격</dt><dd>'+esc(N.who)+'</dd><dt>숨은 사정</dt><dd>'+esc(N.secret)+'</dd></dl></div>';
     if(!N.msg){var i=0,im=d.querySelector('img');d.querySelector('.pp-art').onclick=function(){i=(i+1)%EXP.length;im.src='img/c/'+N.img+'-'+EXP[i]+'.webp';};}
     ppl.appendChild(d);});
 })();
