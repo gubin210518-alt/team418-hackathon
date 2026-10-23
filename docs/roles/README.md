@@ -38,6 +38,8 @@
 
 > 대회 안의 정확한 제출 시간 · 심사 기준은 대회 안내문을 꼭 확인해요. (Claude 는 그 시간을 몰라요.)
 
+> 🔧 **저장소 연결부터 막히면 → [git-setup.md](git-setup.md)** (초대 수락 · 복제 · 내 AI 에 폴더 연결). 폴더에 `CLAUDE.md` 가 있어서 Claude Code 는 열자마자 역할을 물어봐요.
+
 ## AI 에게 처음 시키는 법 (세 명 공통)
 
 1. GitHub Desktop 에서 `Fetch origin` → `Pull` (최신으로 받기)
