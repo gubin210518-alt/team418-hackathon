@@ -1,6 +1,6 @@
-# server/ — AI NPC 서버 (AI 1 담당 · 만들 예정)
+# server/ — AI NPC 서버 (보류 · 담당 미정)
 
-할 일: [docs/roles/AI-1-server.md](../docs/roles/AI-1-server.md) · 규격: [docs/roles/contract.md](../docs/roles/contract.md)
+할 일: [docs/roles/server-on-hold.md](../docs/roles/server-on-hold.md) · 규격: [docs/roles/contract.md](../docs/roles/contract.md)
 
 켜는 법(완성 후): `node --env-file=.env server/index.js` → 브라우저에서 `http://localhost:8787`
 

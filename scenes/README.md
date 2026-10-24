@@ -1,7 +1,7 @@
-# scenes/ — NPC 성격 글 · 시험 대사 (AI 3 담당)
+# scenes/ — NPC 성격 글 · 시험 대사 (보류 · AI NPC 를 할 때만 · 담당 미정)
 
 코딩 없이 **글(.md)만** 쓰는 폴더예요. AI NPC 서버(`server/`)가 여기 글을 그대로 읽어서 AI 에게 넘겨요.
-규격: [docs/roles/contract.md](../docs/roles/contract.md) · 할 일: [docs/roles/AI-3-story-pitch.md](../docs/roles/AI-3-story-pitch.md)
+규격: [docs/roles/contract.md](../docs/roles/contract.md) · 할 일: [docs/roles/server-on-hold.md](../docs/roles/server-on-hold.md)
 
 ```
 scenes/

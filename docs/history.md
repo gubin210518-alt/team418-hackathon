@@ -60,6 +60,7 @@ TEAM 418 이 Claude 와 함께 이 프로젝트를 만들어 온 과정이에요
 - [ ] 동아리 계정 사용 확인 · 해커톤용 키 · 사용 한도 → `server/` 만들기 → 미연시에 연결
 - [ ] 결재요구서 · Notion 을 "하드웨어 없음"으로 고치기, 부품 주문 취소/변경 말씀드리기
 - [ ] 팀원 GitHub 초대 — 호진 `backchun0911` (연님이 직접 초대), 하선 아이디 필요
-- [x] 역할 나누기 (AI 1 서버 · AI 2 화면+총괄 · AI 3 대본·발표) → [roles/README.md](roles/README.md)
+- [x] 역할 나누기 (10/24 개정: AI 1 메인 스토리+총괄 연 · AI 2 미니게임 호진 · AI 3 에셋 하선, AI NPC 서버 보류) → [roles/README.md](roles/README.md)
+- [x] 일과표 저장 → [daily-schedule.md](daily-schedule.md)
 - [ ] 발표 슬라이드 PDF (필수 제출물)
 - [ ] 선택: 타이틀 · 엔딩 배경 그림, 음성(Web Speech) 시도

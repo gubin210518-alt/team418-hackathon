@@ -4,13 +4,13 @@
 사용자는 코딩 초보일 수 있어. **한국어로, 쉽고 짧게** 설명하고, 무엇을 왜 하는지 말해 줘.
 
 ## 시작할 때
-1. 사용자에게 먼저 물어봐: **"너는 AI 1(서버) · AI 2(화면) · AI 3(대본·발표) 중 어느 역할이야?"**
-2. `README.md` → `docs/roles/README.md` → `docs/roles/contract.md` → 그 역할의 할 일 문서(`docs/roles/AI-○-….md`)를 읽어.
+1. 사용자에게 먼저 물어봐: **"너는 AI 1(메인 스토리·총괄 · 연) · AI 2(미니게임 · 호진) · AI 3(에셋 · 하선) 중 어느 역할이야?"**
+2. `README.md` → `docs/roles/README.md` → `docs/roles/contract.md` → `docs/daily-schedule.md`(쌤과 학생의 하루) → 그 역할의 할 일 문서(`docs/roles/AI-1-story.md` · `AI-2-minigames.md` · `AI-3-assets.md`)를 읽어.
 3. 작업 전에 `git pull` (남이 올린 것 받기). 안 되면 사용자에게 GitHub Desktop 의 Fetch/Pull 을 부탁해.
 
 ## 지킬 것
-- **내 역할 폴더만 고쳐**: AI 1 = `server/`, AI 2 = `site/`, AI 3 = `scenes/` · `docs/pitch/`. 다른 폴더를 고쳐야 하면 사용자에게 "팀 단톡에 먼저 말하자"고 해.
-- `docs/roles/contract.md` 의 규격(서버 주소 · JSON 모양)은 **셋이 합의 없이 바꾸지 마.**
+- **내 역할 폴더만 고쳐**: AI 1 = `site/index.html` · `site/sfx.*` · `scenes/` · `docs/pitch/` · `server/` · 나머지 `docs/`, AI 2 = `site/minigames/`, AI 3 = `assets/incoming/` · `docs/asset-prompts-v2.md`. 다른 폴더를 고쳐야 하면 사용자에게 "팀 단톡에 먼저 말하자"고 해.
+- `docs/roles/contract.md` 의 규격(폴더 주인 · 미니게임 `MG.○○.start` 모양 · 에셋 이름)은 **셋이 합의 없이 바꾸지 마.**
 - **API 키 · 비밀번호 · 토큰은 절대 파일 · 커밋 · 채팅에 쓰지 마.** 키는 `.env` 에만 있고 `.gitignore` 로 막혀 있어. `.env` 는 열지도 출력하지도 마. 커밋 전에 `git status` 로 `.env` 가 없는지 확인해.
 - **결제 · 요금이 생길 수 있는 일은 하기 전에 사용자에게 말해.** (유료 API 호출, 결제, 구독) 다른 사람의 키를 쓸 때도 먼저 말해.
 - 커밋은 작게 자주, 메시지는 한국어로 "무엇을 왜" 한 줄. `git push` 는 사용자가 원할 때 해. 충돌이 나면 멋대로 덮어쓰지 말고 사용자와 같이 풀어.

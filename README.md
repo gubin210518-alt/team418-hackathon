@@ -24,17 +24,19 @@ team418-hackathon/
 ├─ .env.example         ← API 키 넣는 양식 (진짜 키는 .env 에, 절대 커밋 X)
 ├─ .gitignore           ← .env 가 GitHub 에 안 올라가게 막아 둠
 ├─ assets/
+│  ├─ incoming/         ← 하선 님(AI 3)이 새 그림 · 소리를 올리는 곳
 │  ├─ characters/       ← 캐릭터 4명 표정 5종 + 동작 3종 (초록 배경, 16:9)
 │  └─ backgrounds/      ← 배경 5종 (사람 없음)
-├─ site/                ← 지금 배포된 소개 사이트 (index.html, build.html, 소개 영상)
-├─ server/              ← AI NPC 서버 (키를 숨기는 곳) — AI 1 담당
-├─ scenes/              ← NPC 성격 글 · 시험 대사 (코딩 없이 글만) — AI 3 담당
+├─ site/                ← 배포된 사이트 (index.html = AI 1 · minigames/ = AI 2 호진 · img/ = 게임용 그림)
+├─ server/              ← AI NPC 서버 (키를 숨기는 곳) — 보류 (AI 1 이 결정)
+├─ scenes/              ← NPC 성격 글 · 시험 대사 (AI NPC 를 할 때만) — AI 1 담당
 ├─ tools/
 │  ├─ scripts/          ← cutout.py (그림 자르기·배경 지우기), check_endings.js (엔딩 도달 확인)
 │  └─ intro-video/      ← 15초 소개 영상 원본 (코드로 만든 영상)
 └─ docs/
-   ├─ roles/                ← ⭐ AI 1 · 2 · 3 역할별 할 일 · 약속(규격) · 총괄 체크리스트
-   ├─ pitch/                ← 발표 슬라이드 PDF · 시연 대본 (AI 3 담당, 만들 예정)
+   ├─ roles/                ← ⭐ 스토리(AI 1) · 미니게임(AI 2) · 에셋(AI 3) 할 일 · 약속(규격) · 총괄 체크리스트
+   ├─ pitch/                ← 발표 슬라이드 PDF · 시연 대본 (임시 AI 1 담당, 만들 예정)
+   ├─ daily-schedule.md     ← ⭐ 쌤과 학생의 하루 (일과표 원본) — 게임 내용의 기준
    ├─ history.md            ← 프로젝트 흐름 · 결정 기록 · 남은 일  ⭐ 처음 오면 여기부터
    ├─ conversation-notes.md ← Claude 와 나눈 대화 정리 (시간 순)
    ├─ vn-design.md          ← 미연시 설계: 맛보기(엔딩 6) + 실제 게임 확장안(엔딩 15)
@@ -63,13 +65,15 @@ team418-hackathon/
 각자 **자기 AI 하나와 짝**이 돼서 역할 1개를 맡아요. 연님은 역할 1개 + **총괄**.
 👉 **[docs/roles/README.md](docs/roles/README.md) 를 먼저 보세요.**
 
-| AI | 맡는 사람 (제안) | 하는 일 | 할 일 문서 |
+| AI | 맡는 사람 | 하는 일 | 할 일 문서 |
 |---|---|---|---|
-| AI 1 | 최호진 | AI NPC 서버 (`server/`) | [AI-1-server.md](docs/roles/AI-1-server.md) |
-| AI 2 | 이승민(연) + 총괄 | 화면 연결 (`site/`) | [AI-2-screen.md](docs/roles/AI-2-screen.md) · [lead-checklist.md](docs/roles/lead-checklist.md) |
-| AI 3 | 최하선 | 대본 · **발표 PDF(필수)** (`scenes/`, `docs/pitch/`) — 코딩 없음 | [AI-3-story-pitch.md](docs/roles/AI-3-story-pitch.md) |
+| AI 1 | 이승민(연) + 총괄 | **메인 스토리** (`site/index.html` 외) — 하루 장면 · 미니게임/그림 붙이기 · 발표(임시) | [AI-1-story.md](docs/roles/AI-1-story.md) · [lead-checklist.md](docs/roles/lead-checklist.md) |
+| AI 2 | 최호진 | **미니게임 7개** (`site/minigames/`) | [AI-2-minigames.md](docs/roles/AI-2-minigames.md) |
+| AI 3 | 최하선 | **에셋** — 배경 · 캐릭터 · BGM (`assets/incoming/`) — 코딩 없음 | [AI-3-assets.md](docs/roles/AI-3-assets.md) |
 
-세 역할이 만나는 규격(서버 주소 · JSON 모양 · 성격 글 모양): [contract.md](docs/roles/contract.md)
+> AI NPC 서버는 **보류** → [server-on-hold.md](docs/roles/server-on-hold.md). 게임 내용의 기준은 [일과표](docs/daily-schedule.md).
+
+세 역할이 만나는 규격(폴더 주인 · 미니게임 모양 · 에셋 이름): [contract.md](docs/roles/contract.md)
 
 ## 처음 참여하는 방법 (팀원용)
 
@@ -81,7 +85,7 @@ team418-hackathon/
 
 - **작업 시작 전 `Fetch / Pull`** 먼저 (남이 바꾼 걸 받아오기)
 - **내 담당 폴더만** 고치기 → 충돌이 거의 안 나요
-  - 서버(`server/`) = AI 1 · 화면(`site/`) = AI 2 · 대본 · 발표(`scenes/`, `docs/pitch/`) = AI 3
+  - 스토리(`site/index.html` 외) = AI 1 · 미니게임(`site/minigames/`) = AI 2 · 에셋(`assets/incoming/`) = AI 3
 - 작게 자주 `Commit` → `Push`. 커밋 메시지는 한국어로 "무엇을 왜" 한 줄
 - 남의 파일을 고쳐야 하면 단톡에 먼저 말하기
 
