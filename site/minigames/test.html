@@ -1,0 +1,122 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>미니게임 시험</title>
+<style>
+  body{margin:0;padding:16px;background:#f3efe6;color:#1f2430;font:15px/1.5 system-ui,-apple-system,"Apple SD Gothic Neo","Malgun Gothic",sans-serif}
+  h1{font-size:18px;margin:0 0 4px}
+  p.sub{margin:0 0 12px;color:#666;font-size:13px}
+  .games{display:flex;flex-wrap:wrap;gap:6px;margin-bottom:10px}
+  .games button,.bar button{font:inherit;border:0;border-radius:8px;padding:8px 12px;min-height:40px;background:#fff;box-shadow:0 1px 3px rgba(0,0,0,.15);cursor:pointer}
+  .games button[aria-pressed="true"]{background:#4f8cff;color:#fff}
+  fieldset{border:1px solid #d8d2c4;border-radius:10px;margin:0 0 10px;padding:8px 10px;display:flex;flex-wrap:wrap;gap:8px 14px;font-size:13px}
+  legend{font-weight:600}
+  label{display:flex;align-items:center;gap:4px}
+  input[type=number]{width:64px}
+  .bar{display:flex;gap:6px;margin-bottom:10px}
+  #stage{min-height:120px;margin-bottom:12px}
+  #log{background:#1f2430;color:#d6f5d6;border-radius:10px;padding:10px;font:12px/1.5 ui-monospace,Menlo,Consolas,monospace;white-space:pre-wrap;max-height:260px;overflow:auto;margin:0}
+  .warn{color:#ffb4b4}
+</style>
+</head>
+<body>
+<h1>🎮 미니게임 시험 페이지</h1>
+<p class="sub">연님의 index.html 없이 미니게임만 따로 시험해요. 게임을 고르면 <code>MG.○○.start()</code> 를 부르고, 끝나면 <code>done</code> 결과가 아래에 찍혀요.</p>
+
+<div class="games" id="games"></div>
+
+<fieldset>
+  <legend>opts (모든 게임)</legend>
+  <label><input type="checkbox" id="o-reduced"> reduced (움직임 줄이기)</label>
+  <label><input type="checkbox" id="o-muted"> muted (소리 끄기)</label>
+  <label>timeLimit <input type="number" id="o-time" min="0" placeholder="기본"> 초</label>
+</fieldset>
+<fieldset>
+  <legend>게임별 opts</legend>
+  <label>rhythm · memoryRatio <input type="range" id="o-mem" min="0" max="1" step="0.05" value="0.5"> <span id="o-mem-v">0.50</span></label>
+  <label>bpm <input type="number" id="o-bpm" value="110" min="60" max="200"></label>
+  <label>sleep · period <select id="o-period"><option>4</option><option>7</option></select></label>
+  <label><input type="checkbox" id="o-chain" checked> memory 결과를 memoryRatio 에 자동으로 넣기</label>
+</fieldset>
+
+<div class="bar">
+  <button type="button" id="restart">↻ 다시 시작</button>
+  <button type="button" id="stop">■ stop()</button>
+  <button type="button" id="clear">로그 지우기</button>
+</div>
+
+<div id="stage"></div>
+<pre id="log" aria-live="polite"></pre>
+
+<!-- 소리: 연님의 sfx.js 가 있으면 SFX.play 로 소리가 나요 (없어도 게임은 돌아가요) -->
+<script src="../sfx.js"></script>
+<script src="memory.js"></script>
+<script src="rhythm.js"></script>
+<script src="classify.js"></script>
+<script src="math.js"></script>
+<script src="sleep.js"></script>
+<script src="inquiry.js"></script>
+<script src="speedeat.js"></script>
+<script>
+(function () {
+  var ORDER = ['memory', 'rhythm', 'classify', 'math', 'sleep', 'inquiry', 'speedeat'];
+  var $ = function (id) { return document.getElementById(id); };
+  var stage = $('stage'), log = $('log'), games = $('games');
+  var current = null, run = 0;
+
+  function line(text, warn) {
+    var s = document.createElement('span');
+    if (warn) s.className = 'warn';
+    s.textContent = text + '\n';
+    log.insertBefore(s, log.firstChild);
+  }
+  function opts(id) {
+    var o = { reduced: $('o-reduced').checked, muted: $('o-muted').checked };
+    var t = Number($('o-time').value);
+    if (t > 0) o.timeLimit = t;
+    if (id === 'rhythm') { o.memoryRatio = Number($('o-mem').value); o.bpm = Number($('o-bpm').value) || 110; }
+    if (id === 'sleep') o.period = Number($('o-period').value);
+    return o;
+  }
+  function start(id) {
+    if (current && window.MG[current]) window.MG[current].stop();
+    current = id;
+    stage.textContent = '';
+    Array.prototype.forEach.call(games.children, function (b) { b.setAttribute('aria-pressed', String(b.dataset.id === id)); });
+    var my = ++run, calls = 0, o = opts(id), t0 = performance.now();
+    line('▶ #' + my + ' ' + id + '.start  opts=' + JSON.stringify(o));
+    window.MG[id].start(stage, o, function (r) {
+      calls++;
+      var sec = ((performance.now() - t0) / 1000).toFixed(1);
+      if (calls > 1) { line('⚠ #' + my + ' ' + id + ' done 이 ' + calls + '번 불렸어요! (규격 위반)', true); return; }
+      if (my !== run) line('⚠ #' + my + ' 끝난 판의 done 이 늦게 왔어요 (stop 정리 확인)', true);
+      line('✔ #' + my + ' ' + id + ' done (' + sec + '초) ' + JSON.stringify(r));
+      if (id === 'memory' && $('o-chain').checked && typeof r.ratio === 'number') {
+        $('o-mem').value = r.ratio; $('o-mem-v').textContent = Number(r.ratio).toFixed(2);
+        line('  → rhythm 의 memoryRatio = ' + r.ratio);
+      }
+    });
+  }
+
+  ORDER.forEach(function (id) {
+    var g = window.MG && window.MG[id];
+    var b = document.createElement('button');
+    b.type = 'button';
+    b.dataset.id = id;
+    b.textContent = g ? g.title + ' (' + id + ')' : id + ' — 파일 없음';
+    b.disabled = !g;
+    b.setAttribute('aria-pressed', 'false');
+    b.addEventListener('click', function () { start(id); });
+    games.appendChild(b);
+  });
+  $('o-mem').addEventListener('input', function () { $('o-mem-v').textContent = Number(this.value).toFixed(2); });
+  $('restart').addEventListener('click', function () { if (current) start(current); });
+  $('stop').addEventListener('click', function () { if (current) { window.MG[current].stop(); line('■ ' + current + '.stop()'); } });
+  $('clear').addEventListener('click', function () { log.textContent = ''; });
+  if (!window.SFX) line('(sfx.js 없음 → 소리 없이 시험)');
+})();
+</script>
+</body>
+</html>
