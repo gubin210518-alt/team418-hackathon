@@ -1,0 +1,162 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>미니게임 붙이기 예시</title>
+<!--
+  연님용 예시: index.html 의 장면에서 미니게임을 이렇게 부르면 돼요.
+  흐름: 1교시 앞 장면 → memory(단기기억) → 그 ratio 를 rhythm(발표 리듬)의 opts.memoryRatio 로 → 결과 대사.
+  핵심은 아래 <script> 의 playMinigame() 한 함수예요. 그대로 복사해서 쓰면 돼요.
+  index.html 에서는 경로가 "minigames/memory.js" 처럼 앞에 minigames/ 가 붙어요.
+-->
+<style>
+  body{margin:0;padding:16px;background:#f3efe6;color:#1f2430;font:15px/1.6 system-ui,-apple-system,"Apple SD Gothic Neo","Malgun Gothic",sans-serif}
+  .scene{max-width:560px;margin:0 auto}
+  .talk{background:#fff;border-radius:14px;padding:14px 16px;box-shadow:0 2px 8px rgba(0,0,0,.08);margin-bottom:12px;min-height:3.2em}
+  .talk b{display:block;font-size:13px;color:#4f8cff}
+  .row{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:12px}
+  .row button{font:inherit;border:0;border-radius:10px;padding:10px 14px;min-height:44px;background:#4f8cff;color:#fff;font-weight:600;cursor:pointer}
+  .row button.alt{background:#ebe7de;color:#444;font-weight:400}
+  .row button:disabled{opacity:.45}
+  #mg-box{margin-bottom:12px}
+  .result{background:#fff;border-radius:14px;padding:12px 16px;font-size:14px}
+  .result table{border-collapse:collapse;width:100%}
+  .result td{padding:4px 6px;border-top:1px solid #eee}
+  .ok{color:#06a77d;font-weight:700}.no{color:#ef476f;font-weight:700}
+</style>
+</head>
+<body>
+<div class="scene">
+  <div class="talk" id="talk"><b>민준</b>오늘 1교시 화법과 언어 발표인데… 준비를 다 못 했다. 아침에 대사부터 외우자!</div>
+  <div class="row">
+    <button type="button" id="go">▶ 1교시 시작 (memory → rhythm)</button>
+    <button type="button" class="alt" id="broken">에러 시험 (없는 게임 부르기)</button>
+  </div>
+  <div id="mg-box"></div>
+  <div class="result" id="result" hidden></div>
+</div>
+
+<script src="../sfx.js"></script>          <!-- index.html 에선 "sfx.js" (없어도 미니게임은 돌아가요) -->
+<script src="memory.js"></script>          <!-- index.html 에선 "minigames/memory.js" -->
+<script src="rhythm.js"></script>
+<script>
+(function () {
+  var box = document.getElementById('mg-box');
+  var talk = document.getElementById('talk');
+  var result = document.getElementById('result');
+  var go = document.getElementById('go');
+  var broken = document.getElementById('broken');
+
+  // ---- 여기부터 복사해서 쓰는 부분 ------------------------------------------------
+  // 미니게임 하나를 실행하고, 끝나면 결과를 Promise 로 돌려줘요.
+  // 무슨 일이 있어도 게임이 멈추지 않게: 파일이 없거나 · 코드가 터지거나 · done 이 안 오면 "건너뛰기" 결과로 넘어가요.
+  var SKIPPED = { score: 0, ratio: 0, pass: false, extra: { skipped: true } };
+  function clean(r) {                                   // 받은 값은 믿지 않고 범위를 한 번 더 잘라요 (contract.md 5번)
+    r = r || {};
+    var n = function (v, a, b) { v = Number(v); return isFinite(v) ? Math.min(b, Math.max(a, v)) : a; };
+    return { score: Math.round(n(r.score, 0, 100)), ratio: n(r.ratio, 0, 1), pass: r.pass === true, extra: (r.extra && typeof r.extra === 'object') ? r.extra : {} };
+  }
+  function playMinigame(id, opts, root) {
+    return new Promise(function (resolve) {
+      var game = window.MG && window.MG[id];
+      var finished = false, guard = 0;
+      function finish(r, why) {
+        if (finished) return;                             // 딱 한 번만
+        finished = true;
+        clearTimeout(guard);
+        if (why) { try { game && game.stop(); } catch (e) {} if (window.console) console.warn('[미니게임]', id, why); }
+        resolve(clean(r));
+      }
+      if (!game || typeof game.start !== 'function') { finish(SKIPPED, '게임 파일이 없어요'); return; }
+      opts = opts || {};
+      // 안전장치: 제한 시간 + 여유 30초가 지나도 done 이 안 오면 건너뛰기로
+      guard = setTimeout(function () { finish(SKIPPED, 'done 이 안 와서 건너뜀'); }, ((Number(opts.timeLimit) || 90) + 30) * 1000);
+      try {
+        game.start(root, opts, function (r) { finish(r); });
+      } catch (e) {
+        finish(SKIPPED, '시작하다 에러: ' + e.message);
+      }
+    });
+  }
+  // 모든 게임에 공통으로 넘기면 좋은 opts
+  function baseOpts() {
+    return {
+      reduced: !!(window.matchMedia && matchMedia('(prefers-reduced-motion: reduce)').matches),
+      muted: !!(window.SFX && SFX.muted && SFX.muted())
+    };
+  }
+  // ---- 복사 끝 ----------------------------------------------------------------------
+
+  function say(who, text) {
+    talk.textContent = '';
+    var b = document.createElement('b');
+    b.textContent = who;
+    talk.appendChild(b);
+    talk.appendChild(document.createTextNode(text));
+  }
+  function show(rows) {
+    result.hidden = false;
+    result.textContent = '';
+    var t = document.createElement('table');
+    rows.forEach(function (r) {
+      var tr = t.insertRow();
+      tr.insertCell().textContent = r[0];
+      var c = tr.insertCell();
+      c.textContent = r[1];
+      if (r[2]) c.className = r[2];
+    });
+    result.appendChild(t);
+  }
+  function line(name, r) {
+    return [name, (r.extra.skipped ? '건너뜀 · ' : '') + r.score + '점 · ' + (r.pass ? '통과' : '실패'), r.pass ? 'ok' : 'no'];
+  }
+
+  // 1교시 장면 흐름
+  function period1() {
+    go.disabled = broken.disabled = true;
+    result.hidden = true;
+    say('민준', '대사를 외워 보자… (문장을 보고 그대로 쳐 보세요)');
+    playMinigame('memory', baseOpts(), box)
+      .then(function (mem) {
+        try { window.MG.memory.stop(); } catch (e) {}     // 끝난 게임 화면을 치워요
+        say('선생님', '자, 민준이 발표해 볼까? (외운 만큼 리듬이 쉬워져요: ' + Math.round(mem.ratio * 100) + '%)');
+        var o = baseOpts();
+        o.memoryRatio = mem.ratio;                          // ★ memory 결과를 rhythm 난이도로
+        o.bpm = 110;
+        return playMinigame('rhythm', o, box).then(function (rh) { return [mem, rh]; });
+      })
+      .then(function (both) {
+        var mem = both[0], rh = both[1];
+        try { window.MG.rhythm.stop(); } catch (e) {}
+        show([
+          line('단기기억', mem),
+          ['', '일치율 ' + Math.round(mem.ratio * 100) + '%'],
+          line('발표 리듬', rh),
+          ['', 'Perfect ' + (rh.extra.perfect || 0) + ' · Good ' + (rh.extra.good || 0) + ' · Miss ' + (rh.extra.miss || 0)]
+        ]);
+        // 결과에 따라 다음 대사 (연님이 원하는 대로 바꿔요)
+        if (rh.pass) say('선생님', '준비를 짧게 했다더니 꽤 잘했네! 수고했어.');
+        else if (rh.extra.skipped) say('민준', '(발표를 건너뛰었다… 다음 시간엔 꼭 해야지)');
+        else say('선생님', '조금 버벅였지만 끝까지 했구나. 다음엔 미리 준비해 오자.');
+        go.disabled = broken.disabled = false;
+      });
+  }
+
+  // 일부러 없는 게임을 불러서 "에러가 나도 건너뛰기로 넘어가는" 모습 보기
+  function brokenDemo() {
+    go.disabled = broken.disabled = true;
+    say('민준', '(없는 미니게임을 불러 봐요…)');
+    playMinigame('oops', baseOpts(), box).then(function (r) {
+      show([line('없는 게임 oops', r), ['', '에러가 나도 멈추지 않고 건너뛰기 결과로 이어져요']]);
+      say('민준', '(미니게임이 안 열려서 건너뛰고 이야기가 계속돼요)');
+      go.disabled = broken.disabled = false;
+    });
+  }
+
+  go.addEventListener('click', period1);
+  broken.addEventListener('click', brokenDemo);
+})();
+</script>
+</body>
+</html>

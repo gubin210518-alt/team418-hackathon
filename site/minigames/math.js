@@ -188,7 +188,7 @@
     '.mg-ma-opts .mg-btn.mg-no{background:#ef476f;border-color:#ef476f;color:#fff}',
     '.mg-ma-pad{margin-top:10px;position:relative}',
     '.mg-ma-pad canvas{display:block;width:100%;height:170px;background:#fff;border:2px dashed #cfc8b8;border-radius:10px;touch-action:none;cursor:crosshair}',
-    '.mg-ma-pad .mg-skip{position:absolute;right:6px;top:6px}',
+    '.mg-ma-clear{position:absolute;right:6px;top:6px;font:inherit;font-size:13px;border:0;border-radius:10px;background:#ebe7de;color:#444;min-height:36px;padding:6px 12px;cursor:pointer}',
     '.mg-ma-pad span{position:absolute;left:10px;top:6px;font-size:12px;color:#aaa;pointer-events:none}'
   ].join('');
 
@@ -210,7 +210,7 @@
     var pad = K.el('div', 'mg-ma-pad', null, S.body);
     var cv = K.el('canvas', null, null, pad);
     K.el('span', null, '✏️ 연습장', pad);
-    var clr = K.el('button', 'mg-skip', '지우기', pad);
+    var clr = K.el('button', 'mg-ma-clear', '지우기', pad);
     clr.type = 'button';
     var ctx = cv.getContext('2d'), drawing = false;
     function fit() {
